@@ -24,8 +24,8 @@ if (argv.config) {
     throw err
   }
 
-  if (!isPlainObject(userConfig)) {
-    throw new Error('Configuration file must export a plain object')
+  if (!isPlainObject(userConfig) && typeof userConfig !== 'function') {
+    throw new Error('Configuration file must export a plain object or a function')
   }
 }
 

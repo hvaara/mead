@@ -4,6 +4,8 @@ const boom = require('express-boom')
 module.exports = config => {
   const app = express()
 
+  console.log(config)
+
   // Dat middleware
   app.use(boom())
 

@@ -2,7 +2,7 @@ const pkg = require('../../package.json')
 
 module.exports = (req, res) => {
   res.json({
-    name: pkg.name,
+    service: pkg.name,
     version: pkg.version
   })
 }

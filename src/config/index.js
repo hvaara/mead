@@ -1,4 +1,6 @@
 /* eslint-disable no-process-env */
+const baseConfig = require('./baseConfig')
+
 const OPTS_MATRIX = [
   ['port', 'PORT', 3999],
   ['hostname', 'HOSTNAME', '127.0.0.1'],
@@ -27,9 +29,12 @@ const normalizeBool = bool => {
   }
 }
 
-module.exports = options => {
-  const opts = options || {}
-  const result = Object.assign({}, opts)
+module.exports = config => {
+  const configIsFunction = typeof config === 'function'
+  const userConfig = configIsFunction ? {} : config
+  const processConfig = configIsFunction ? config : cfg => cfg
+
+  const result = Object.assign({}, baseConfig, userConfig)
 
   OPTS_MATRIX.forEach(opt => {
     const key = opt[0]
@@ -38,12 +43,10 @@ module.exports = options => {
     const env = opt[1] && `MEAD_${opt[1]}`
 
     let val
-    if (key in opts) {
-      val = opts[key]
+    if (!configIsFunction && key in userConfig) {
+      val = userConfig[key]
     } else if (env && env in process.env) {
       val = process.env[env]
-    } else if (typeof opt[2] === 'function') {
-      val = opt[2](result)
     } else if (opt.length === 3) {
       val = opt[2]
     }
@@ -57,5 +60,5 @@ module.exports = options => {
     }
   })
 
-  return result
+  return processConfig(result)
 }
