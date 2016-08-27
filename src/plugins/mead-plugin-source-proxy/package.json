@@ -1,0 +1,29 @@
+{
+  "name": "mead-plugin-source-proxy",
+  "version": "1.0.0",
+  "description": "http(s) proxy source for the Mead image transformer service",
+  "main": "src/proxySource.js",
+  "scripts": {
+    "test": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rexxars/mead-plugin-source-proxy.git"
+  },
+  "keywords": [
+    "mead-plugin",
+    "mead-source"
+  ],
+  "author": "Espen Hovlandsdal <espen@hovlandsdal.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rexxars/mead-plugin-source-proxy/issues"
+  },
+  "homepage": "https://github.com/rexxars/mead-plugin-source-proxy#readme",
+  "dependencies": {
+    "async.parallel": "^0.5.2",
+    "boom": "^4.0.0",
+    "needle": "^1.1.0",
+    "url-is-private": "^2.0.1"
+  }
+}

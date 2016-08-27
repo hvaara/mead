@@ -11,11 +11,18 @@ module.exports = (req, res, next) => {
     return
   }
 
-  sourceAdapter
-    .getImageStream(urlPath)
-    .on('error', handleError)
-    .pipe(transformStream)
-    .pipe(res)
+  sourceAdapter.getImageStream(urlPath, (err, stream) => {
+    if (err) {
+      handleError(err)
+      return
+    }
+
+    stream
+      .on('error', handleError)
+      .pipe(transformStream)
+      .on('error', handleError)
+      .pipe(res)
+  })
 
   function handleError(err) {
     if (err.isBoom) {
