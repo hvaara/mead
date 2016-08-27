@@ -7,17 +7,17 @@ const defaultConfig = {
   allowPrivateHosts: false
 }
 
-const isPrivateUrl = url => cb =>
-  urlIsPrivate.isPrivate(url, (err, isPrivate) => {
-    cb(err, !isPrivate)
-  })
-
 function proxySource(conf) {
   const config = Object.assign({}, defaultConfig, conf)
 
   return {getImageStream}
 
   function getImageStream(url, callback) {
+    if (!/^https?:\/\//i.test(url)) {
+      setImmediate(callback, Boom.badRequest('Only http/https URLs are supported'))
+      return
+    }
+
     parallel([
       !config.allowPrivateHosts && isPrivateUrl(url),
       config.allowRequest
@@ -52,6 +52,11 @@ function proxySource(conf) {
   }
 }
 
+function isPrivateUrl(url) {
+  return cb => urlIsPrivate.isPrivate(url, (err, isPrivate) => {
+    cb(err, !isPrivate)
+  })
+}
 
 module.exports = {
   name: 'proxy',
