@@ -4,8 +4,10 @@ const baseConfig = require('./baseConfig')
 const OPTS_MATRIX = [
   ['port', 'PORT', 3999],
   ['hostname', 'HOSTNAME', '127.0.0.1'],
+  ['trustProxy', 'TRUST_PROXY', false],
   ['requireSignedUrls', 'SIGNED_URLS', true],
-  ['proxyTimeout', 'TIMEOUT', 15000]
+  ['proxyTimeout', 'TIMEOUT', 15000],
+  ['sourceMode', 'SOURCE_MODE', 'path']
 ]
 
 const BOOL_OPTS = [

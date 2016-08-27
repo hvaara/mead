@@ -1,0 +1,26 @@
+{
+  "name": "mead-plugin-source-resolver-config",
+  "version": "1.0.0",
+  "description": "Super-simple source resolver, that simply uses the configuration file",
+  "main": "src/source-resolver.js",
+  "scripts": {
+    "test": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rexxars/mead-plugin-source-resolver-config.git"
+  },
+  "keywords": [
+    "mead-plugin",
+    "mead-source-resolver"
+  ],
+  "author": "Espen Hovlandsdal <espen@hovlandsdal.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rexxars/mead-plugin-source-resolver-config/issues"
+  },
+  "homepage": "https://github.com/rexxars/mead-plugin-source-resolver-config#readme",
+  "dependencies": {
+    "boom": "^4.0.0"
+  }
+}
