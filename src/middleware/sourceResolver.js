@@ -7,7 +7,7 @@ module.exports = app => {
   const resolvers = plugins['source-resolver'] || {}
   const handler = resolvers[requestedResolver]
   if (!handler) {
-    throw new Error(`sourceResolver plugin with name "${requestedResolver}" not found`)
+    throw Boom.badImplementation(`sourceResolver plugin with name "${requestedResolver}" not found`)
   }
 
   const method = config.sourceMode

@@ -13,7 +13,7 @@ const configSourceResolver = {
   handler: (sourceName, req, res, next) => {
     const source = req.app.locals.configSourceResolver.sources[sourceName]
     if (!source) {
-      next(Boom.badRequest(`Source with name "${sourceName}" not found`))
+      next(Boom.notFound(`Source with name "${sourceName}" not found`))
       return
     }
 
