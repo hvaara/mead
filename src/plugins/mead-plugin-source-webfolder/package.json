@@ -1,0 +1,25 @@
+{
+  "name": "mead-plugin-source-webfolder",
+  "version": "1.0.0",
+  "description": "Web folder source for the Mead image transformer service",
+  "main": "src/webfolderSource.js",
+  "scripts": {
+    "test": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rexxars/mead-plugin-source-webfolder.git"
+  },
+  "keywords": [
+    "mead-plugin",
+    "mead-source"
+  ],
+  "author": "Espen Hovlandsdal <espen@hovlandsdal.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rexxars/mead-plugin-source-webfolder/issues"
+  },
+  "homepage": "https://github.com/rexxars/mead-plugin-source-webfolder#readme",
+  "dependencies": {
+  }
+}
