@@ -1,14 +1,22 @@
 const Boom = require('boom')
 
+const helpUrl = 'https://github.com/rexxars/mead#configuration'
 const configSourceResolver = {
   name: 'config',
   type: 'source-resolver',
   register: ({app}, next) => {
-    app.locals.configSourceResolver = {
-      sources: (app.locals.config.sources || []).reduce(keyByName, {})
+    const sources = app.locals.config.sources || []
+    if (sources.length === 0) {
+      return next(new Error(
+        `No sources configured. See ${helpUrl} for setup instructions.\n`
+      ))
     }
 
-    next()
+    app.locals.configSourceResolver = {
+      sources: sources.reduce(keyByName, {})
+    }
+
+    return next()
   },
   handler: (sourceName, req, res, next) => {
     const source = req.app.locals.configSourceResolver.sources[sourceName]

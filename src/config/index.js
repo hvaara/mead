@@ -1,5 +1,6 @@
 /* eslint-disable no-process-env */
 const baseConfig = require('./baseConfig')
+const merge = require('lodash/merge')
 
 const OPTS_MATRIX = [
   ['port', 'PORT', 3999],
@@ -35,7 +36,7 @@ module.exports = config => {
   const userConfig = configIsFunction ? {} : config
   const processConfig = configIsFunction ? config : cfg => cfg
 
-  const result = Object.assign({}, baseConfig, userConfig)
+  const result = merge({}, baseConfig, userConfig)
 
   OPTS_MATRIX.forEach(opt => {
     const key = opt[0]

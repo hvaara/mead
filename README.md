@@ -1,50 +1,68 @@
 # mead
 
-Image thing
+<img align="right" width="270" height="270" src="assets/mead.png" alt="Mead">
 
-## Notes
+On-the-fly image transforming service written in Node.js.
+Uses [libvips](https://github.com/jcupitt/libvips) for performant image operations.
 
-### Sources
+## Features
 
-- Define one or many image sources
-- Make source lookup adapter dynamic. Default can be just a config, but can be told to fetch from other source
-- Source name passed as either path prefix (`/<source>`) or subdomain (`<source>.api`). Global setting.
-- Storage adapters can be added, probably want to support S3/GCS, proxy, file system
+* Supports multiple sources with independent configurations
+* Source adapters as plugins
+  - Filesystem
+  - Web folder
+  - HTTP proxy
+* Signed URLs (optional)
 
-## Pluggability
+## Installing
 
-- All adapters should be event emitters, implementing some baseline events
-  - onBeforeFetch
+```shell
+npm install -g mead
+mead --config path/to/config.js
+```
 
-### Performance
+## Configuration
 
-- Configurable cache settings for images
-- Use sharp as default adapter for scaling images
-- Prescale options ("variants")
-- Caching
+Mead can be passed the path of a configuration file. It can be either a plain JSON file or a node module that exports a plain object. The passed configuration will be merged with the defaults. For more fine grained control, you can point to a module which exports a function, which will receive the default configuration as it's only argument and should return a new configuration. Example:
 
-### Security
+**meadConfig.js**:
+```js
+module.exports = {
+  sources: [{
+    name: 'holiday',
+    adapter: 'fs',
+    config: {
+      basePath: '/home/rexxars/photos/holiday',
+      secureUrlToken: 'mootools'
+    }
+  }, {
+    name: 'proxy',
+    adapter: 'proxy',
+    config: {
+      secureUrlToken: 'foobar'
+    }
+  }, {
+    name: 'hacknights',
+    adapter: 'webfolder',
+    config: {
+      baseUrl: 'https://espen.codes/photos/hacknights'
+    }
+  }],
 
-- Optional signing of URLs. Probably want to make it mandatory for proxy source adapter.
-- Signature should be simple to implement. Configurable? Default: md5(sourceToken + path + query)
-- Uses query parameter `s`
+  plugins: [
+    require('mead-plugin-something')
+  ]
+}
+```
 
-### URLs
+**Running**:
+```
+mead --config=meadConfig.js
+```
 
-- **File system source**
-- `http://source.mead.api/folder/image-name.jpg?w=1400`
-- `http://source.mead.api/folder/image-name.jpg?w=1400&h=700&fit=crop`
-- **Proxy source**
-- `http://source.mead.api/<urlencoded-image-url.jpg>?w=1400`
+This will expose three channels (`holiday`, `proxy` and `hacknights`), which all use different source adapters. The three adapters mentioned (`fs`, `proxy` and `webfolder`) are plugins which are bundled with mead and enabled by default.
 
-### Metadata
-
-- Some kind of basic metadata API?
-
-### Additional features
-
-- Error image URL
-- Missing image URL
+We're also telling mead to load the additional `something`-plugin.
 
 ## License
 

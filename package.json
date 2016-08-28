@@ -6,6 +6,9 @@
   "scripts": {
     "test": "eslint ."
   },
+  "bin": {
+    "mead": "bin/mead.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rexxars/mead.git"
@@ -36,7 +39,6 @@
     "responsive-callback": "^1.0.1",
     "serve-favicon": "^2.3.0",
     "sharp": "^0.16.0",
-    "through2": "^2.0.1",
     "yargs": "^5.0.0"
   }
 }
