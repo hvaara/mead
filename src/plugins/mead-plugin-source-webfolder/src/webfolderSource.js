@@ -1,27 +1,36 @@
 const url = require('url')
-const proxySource = require('../../mead-plugin-source-proxy').handler
+const Boom = require('boom')
+const proxySource = require('../../mead-plugin-source-proxy')
+const httpPattern = /^https?:\/\//i
 
 function webfolderSource(config) {
   if (!config.baseUrl) {
     throw new Error('Webfolder sources require a `baseUrl`-property')
   }
 
-  if (!/^https?:\/\//i.test(config.baseUrl)) {
+  if (!httpPattern.test(config.baseUrl)) {
     throw new Error('Webfolder source `baseUrl`-property must be an HTTP/HTTPS url')
   }
 
-  const baseUrl = `${config.baseUrl}/`.replace(/\/+$/, '/')
-  const proxy = proxySource({
-    // Since the user is specifying the base URL himself, allow private hosts
-    allowPrivateHosts: true,
-    allowRequest: config.allowRequest
-  })
+  const baseUrl = url.parse(`${config.baseUrl}/`.replace(/\/+$/, '/'))
 
-  return {getImageStream}
+  return {getImageStream, requiresSignedUrls: false}
 
-  function getImageStream(path, callback) {
-    const imageUrl = url.resolve(baseUrl, path)
-    proxy.getImageStream(imageUrl, callback)
+  function getImageStream(urlPath, callback) {
+    const imageUrl = url.format(Object.assign({}, baseUrl, {
+      pathname: url.resolve(baseUrl.pathname, urlPath)
+    }))
+
+    if (imageUrl.indexOf(config.baseUrl) !== 0) {
+      callback(Boom.notFound('Image not found'))
+      return
+    }
+
+    proxySource.getImageStream({
+      // Since the user is specifying the base URL himself, allow private hosts
+      allowPrivateHosts: true,
+      allowRequest: config.allowRequest
+    }, imageUrl, callback)
   }
 }
 

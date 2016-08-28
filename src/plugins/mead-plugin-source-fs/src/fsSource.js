@@ -7,7 +7,7 @@ function fsSource(config) {
     throw new Error('`basePath` is required for `fs`-source to work')
   }
 
-  return {getImageStream}
+  return {getImageStream, requiresSignedUrls: false}
 
   function getImageStream(urlPath, callback) {
     const fsPath = path.sep === '/' ? urlPath : urlPath.replace(/\//g, path.sep)
