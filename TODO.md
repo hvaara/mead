@@ -1,0 +1,30 @@
+# TODO
+
+- [ ] Write tests
+- [ ] Cache infrastructure + adapter(s)
+- [ ] Cache options + headers
+- [ ] S3 adapter
+- [ ] Test and improve error handling
+  - [ ] Non-image urls/files
+  - [ ] Invalid images
+  - [ ] Timeouts (proxy)
+  - [ ] Redirects (proxy)
+  - [ ] Permission errors (fs)
+- [ ] Add more transformations
+  - [ ] Fit params
+  - [ ] Crop
+  - [ ] Trim
+  - [ ] Extend (border)
+  - [ ] Invert
+  - [ ] Blur
+  - [ ] Sharpen
+  - [ ] DPR
+  - [ ] Monochrome
+  - [ ] Normalize
+  - [ ] Watermark
+- [ ] Add download flag (dl=<filename>)
+- [ ] Client hints
+- [ ] Metadata
+  - [ ] Face detection
+- [ ] Documentation
+- [ ] Website
