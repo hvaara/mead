@@ -4,6 +4,7 @@
 - [ ] Cache infrastructure + adapter(s)
 - [ ] Cache options + headers
 - [x] S3 adapter
+- [ ] Dockerize
 - [ ] Test and improve error handling
   - [ ] Non-image urls/files
   - [ ] Invalid images
