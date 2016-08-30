@@ -3,7 +3,7 @@
 - [ ] Write tests
 - [ ] Cache infrastructure + adapter(s)
 - [ ] Cache options + headers
-- [ ] S3 adapter
+- [x] S3 adapter
 - [ ] Test and improve error handling
   - [ ] Non-image urls/files
   - [ ] Invalid images

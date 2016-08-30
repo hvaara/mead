@@ -6,7 +6,7 @@ const errorHandler = require('./middleware/errorHandler')
 const sourceResolver = require('./middleware/sourceResolver')
 const sourceAdapterLoader = require('./middleware/sourceAdapterLoader')
 const signedRequests = require('./middleware/signedRequests')
-const loadPlugins = require('./plugins/loadPlugins')
+const loadPlugins = require('./loadPlugins')
 
 module.exports = (config, callback) => {
   const app = express()

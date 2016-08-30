@@ -1,5 +1,5 @@
 const responsiveCallback = require('responsive-callback')
-const validatePlugin = require('./validatePlugin')
+const validatePlugin = require('./validators/plugin')
 const series = require('fastseries')()
 
 const cbOpts = {
