@@ -1,11 +1,11 @@
 const path = require('path')
 const Boom = require('boom')
+const values = require('lodash/values')
 const express = require('express')
 const favicon = require('serve-favicon')
 const errorHandler = require('./middleware/errorHandler')
 const sourceResolver = require('./middleware/sourceResolver')
 const sourceAdapterLoader = require('./middleware/sourceAdapterLoader')
-const signedRequests = require('./middleware/signedRequests')
 const loadPlugins = require('./loadPlugins')
 
 module.exports = (config, callback) => {
@@ -24,7 +24,10 @@ function initApp(app, config) {
   app.use(favicon(path.join(__dirname, '..', 'assets', 'favicon.ico')))
   app.use(sourceResolver(app))
   app.use(sourceAdapterLoader)
-  app.use(signedRequests)
+
+  // Register plugin-based middleware
+  values(app.locals.plugins.middleware || {})
+    .forEach(middleware => app.use(middleware))
 
   // Dem routes
   const pre = config.sourceMode === 'path' ? '/:source' : ''
