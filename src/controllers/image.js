@@ -44,6 +44,8 @@ module.exports = (req, res, next) => {
     if (cache.ttl) {
       res.setHeader('Cache-Control', `public, max-age=${cache.ttl}`)
     }
+
+    res.setHeader('X-Powered-By', 'mead.science')
   }
 
   function handleError(err) {
