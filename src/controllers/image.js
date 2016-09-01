@@ -19,12 +19,7 @@ module.exports = (req, res, next) => {
     return
   }
 
-  transformStream.on('info', info => {
-    const mime = info.format && mimeTypes[info.format]
-    if (mime) {
-      res.setHeader('Content-Type', mime)
-    }
-  })
+  transformStream.on('info', sendHeaders)
 
   sourceAdapter.getImageStream(urlPath, (err, stream) => {
     if (err) {
@@ -38,6 +33,18 @@ module.exports = (req, res, next) => {
       .on('error', handleError)
       .pipe(res)
   })
+
+  function sendHeaders(info) {
+    const mimeType = info.format && mimeTypes[info.format]
+    if (mimeType) {
+      res.setHeader('Content-Type', mimeType)
+    }
+
+    const cache = res.locals.source.cache || {}
+    if (cache.ttl) {
+      res.setHeader('Cache-Control', `public, max-age=${cache.ttl}`)
+    }
+  }
 
   function handleError(err) {
     if (err.isBoom) {
