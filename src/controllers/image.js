@@ -29,10 +29,6 @@ module.exports = (req, res, next) => {
       return next(err)
     }
 
-    if (err.code === 'ENOENT') {
-      return next(Boom.notFound('Image not found'))
-    }
-
     return next(Boom.badImplementation(err))
   }
 }
