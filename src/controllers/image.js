@@ -1,6 +1,13 @@
 const Boom = require('boom')
 const transformer = require('../transform/transformer')
 
+const mimeTypes = {
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp'
+}
+
 module.exports = (req, res, next) => {
   const {sourceAdapter} = res.locals
   const urlPath = req.params['0']
@@ -10,6 +17,13 @@ module.exports = (req, res, next) => {
     next(Boom.badRequest(transformStream))
     return
   }
+
+  transformStream.on('info', info => {
+    const mime = info.format && mimeTypes[info.format]
+    if (mime) {
+      res.setHeader('Content-Type', mime)
+    }
+  })
 
   sourceAdapter.getImageStream(urlPath, (err, stream) => {
     if (err) {
