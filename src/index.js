@@ -20,6 +20,9 @@ module.exports = (config, callback) => {
 }
 
 function initApp(app, config) {
+  // Always serve the index route
+  app.get('/', require('./controllers/index'))
+
   // Dat middleware
   app.use(favicon(path.join(__dirname, '..', 'assets', 'favicon.ico')))
   app.use(sourceResolver(app))
@@ -31,7 +34,6 @@ function initApp(app, config) {
 
   // Dem routes
   const pre = config.sourceMode === 'path' ? '/:source' : ''
-  app.get('/', require('./controllers/index'))
   app.get(`${pre}/*`, require('./controllers/image'))
 
   if (pre) {
