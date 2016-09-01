@@ -8,7 +8,7 @@ mead(config, (err, app) => {
     throw err
   }
 
-  app.listen(config.port, () => {
+  app.listen(config.port, config.hostname, () => {
     console.log(`Mead running on http://${config.hostname}:${config.port}`)
   })
 })
