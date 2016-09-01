@@ -5,7 +5,8 @@ const mimeTypes = {
   jpeg: 'image/jpeg',
   png: 'image/png',
   gif: 'image/gif',
-  webp: 'image/webp'
+  webp: 'image/webp',
+  svg: 'image/svg+xml'
 }
 
 module.exports = (req, res, next) => {
