@@ -1,7 +1,7 @@
 const sharp = require('sharp')
 const pipeline = [quality, size, rotation, background, flip, output]
 
-function getTransformer(params, response) {
+function getTransformer(params) {
   const tr = sharp()
   pipeline.forEach(mod => mod(tr, params))
   return tr

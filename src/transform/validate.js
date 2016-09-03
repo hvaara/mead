@@ -8,7 +8,8 @@ const queryMap = {
   bg: ['backgroundColor', color],
   fm: ['output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
   rot: ['rotation', num, enumz([0, 90, 180, 270])],
-  flip: ['flip', enumz(['h', 'v', 'hv'])]
+  flip: ['flip', enumz(['h', 'v', 'hv'])],
+  dl: ['download', identity]
 }
 
 function validateTransforms(qs) {
@@ -27,6 +28,10 @@ function validateTransforms(qs) {
     params[name] = value
     return params
   }, {})
+}
+
+function identity(param, input) {
+  return input
 }
 
 function num(param, value) {

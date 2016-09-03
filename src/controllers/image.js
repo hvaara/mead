@@ -23,7 +23,7 @@ module.exports = (request, response, next) => {
   }
 
   const transformStream = transformer(params)
-  transformStream.on('info', info => sendHeaders(info, response))
+  transformStream.on('info', info => sendHeaders(info, params, response))
 
   sourceAdapter.getImageStream(urlPath, (err, stream) => {
     if (err) {
@@ -43,14 +43,26 @@ module.exports = (request, response, next) => {
   }
 }
 
-function sendHeaders(info, response) {
+function sendHeaders(info, params, response) {
+  // Security
+  response.setHeader('X-Content-Type-Options', 'nosniff')
+
+  // Content type
   const mimeType = info.format && mimeTypes[info.format]
   response.setHeader('Content-Type', mimeType || 'application/octet-stream')
 
+  // Cache settings
   const cache = response.locals.source.cache || {}
   if (cache.ttl) {
     response.setHeader('Cache-Control', `public, max-age=${cache.ttl}`)
   }
 
+  // Download?
+  if (typeof params.download !== 'undefined') {
+    const name = `"${encodeURIComponent(params.download || '')}"`
+    response.setHeader('Content-Disposition', `attachment;filename=${name}`)
+  }
+
+  // Shameless promotion
   response.setHeader('X-Powered-By', 'mead.science')
 }

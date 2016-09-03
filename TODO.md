@@ -4,7 +4,7 @@
 - [ ] Cache infrastructure + adapter(s)
 - [ ] Cache options + headers
 - [x] S3 adapter
-- [ ] Dockerize
+- [x] Dockerize
 - [ ] Test and improve error handling
   - [ ] Non-image urls/files
   - [ ] Invalid images
@@ -23,7 +23,7 @@
   - [ ] Monochrome
   - [ ] Normalize
   - [ ] Watermark
-- [ ] Add download flag (dl=<filename>)
+- [x] Add download flag (dl=<filename>)
 - [ ] Client hints
 - [ ] Metadata
   - [ ] Face detection
