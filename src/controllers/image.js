@@ -22,7 +22,7 @@ module.exports = (request, response, next) => {
     return
   }
 
-  const transformStream = transformer(params, response)
+  const transformStream = transformer(params)
   transformStream.on('info', info => sendHeaders(info, response))
 
   sourceAdapter.getImageStream(urlPath, (err, stream) => {
@@ -45,9 +45,7 @@ module.exports = (request, response, next) => {
 
 function sendHeaders(info, response) {
   const mimeType = info.format && mimeTypes[info.format]
-  if (mimeType) {
-    response.setHeader('Content-Type', mimeType)
-  }
+  response.setHeader('Content-Type', mimeType || 'application/octet-stream')
 
   const cache = response.locals.source.cache || {}
   if (cache.ttl) {
