@@ -1,5 +1,6 @@
 const path = require('path')
 const Boom = require('boom')
+const semver = require('semver')
 const values = require('lodash/values')
 const express = require('express')
 const favicon = require('serve-favicon')
@@ -7,8 +8,15 @@ const errorHandler = require('./middleware/errorHandler')
 const sourceResolver = require('./middleware/sourceResolver')
 const sourceAdapterLoader = require('./middleware/sourceAdapterLoader')
 const loadPlugins = require('./loadPlugins')
+const pkg = require('../package.json')
 
 module.exports = (config, callback) => {
+  if (!semver.satisfies(process.version, pkg.engines.node)) {
+    throw new Error(
+      `Mead requires Node.js ${pkg.engines.node}, you are running ${process.version}`
+    )
+  }
+
   const app = express()
   app.locals.config = config
   app.disable('x-powered-by')
