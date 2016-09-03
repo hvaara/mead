@@ -54,7 +54,8 @@ function sendHeaders(info, params, response) {
   // Cache settings
   const cache = response.locals.source.cache || {}
   if (cache.ttl) {
-    response.setHeader('Cache-Control', `public, max-age=${cache.ttl}`)
+    const ttl = cache.ttl | 0 // eslint-disable-line no-bitwise
+    response.setHeader('Cache-Control', `public, max-age=${ttl}`)
   }
 
   // Download?
