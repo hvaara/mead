@@ -1,5 +1,6 @@
 const Boom = require('boom')
 const transformer = require('../transform/transformer')
+const validateTransforms = require('../transform/validate')
 
 const mimeTypes = {
   jpeg: 'image/jpeg',
@@ -9,17 +10,20 @@ const mimeTypes = {
   svg: 'image/svg+xml'
 }
 
-module.exports = (req, res, next) => {
-  const {sourceAdapter} = res.locals
-  const urlPath = req.params['0']
-  const transformStream = transformer(req, res)
+module.exports = (request, response, next) => {
+  const {sourceAdapter} = response.locals
+  const urlPath = request.params['0']
 
-  if (transformStream instanceof Error) {
-    next(Boom.badRequest(transformStream))
+  let params
+  try {
+    params = validateTransforms(request.query)
+  } catch (err) {
+    next(Boom.badRequest(err))
     return
   }
 
-  transformStream.on('info', sendHeaders)
+  const transformStream = transformer(params, response)
+  transformStream.on('info', info => sendHeaders(info, response))
 
   sourceAdapter.getImageStream(urlPath, (err, stream) => {
     if (err) {
@@ -31,28 +35,24 @@ module.exports = (req, res, next) => {
       .on('error', handleError)
       .pipe(transformStream)
       .on('error', handleError)
-      .pipe(res)
+      .pipe(response)
   })
 
-  function sendHeaders(info) {
-    const mimeType = info.format && mimeTypes[info.format]
-    if (mimeType) {
-      res.setHeader('Content-Type', mimeType)
-    }
-
-    const cache = res.locals.source.cache || {}
-    if (cache.ttl) {
-      res.setHeader('Cache-Control', `public, max-age=${cache.ttl}`)
-    }
-
-    res.setHeader('X-Powered-By', 'mead.science')
-  }
-
   function handleError(err) {
-    if (err.isBoom) {
-      return next(err)
-    }
-
-    return next(Boom.badImplementation(err))
+    next(err.isBoom ? err : Boom.badImplementation(err))
   }
+}
+
+function sendHeaders(info, response) {
+  const mimeType = info.format && mimeTypes[info.format]
+  if (mimeType) {
+    response.setHeader('Content-Type', mimeType)
+  }
+
+  const cache = response.locals.source.cache || {}
+  if (cache.ttl) {
+    response.setHeader('Cache-Control', `public, max-age=${cache.ttl}`)
+  }
+
+  response.setHeader('X-Powered-By', 'mead.science')
 }

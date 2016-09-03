@@ -1,14 +1,6 @@
 const sharp = require('sharp')
-const validate = require('./validate')
 
-function getTransformer(req, res) {
-  let params
-  try {
-    params = validate(req.query)
-  } catch (err) {
-    return err
-  }
-
+function getTransformer(params, response) {
   const tr = sharp()
 
   tr.quality(params.quality || 75)
@@ -41,7 +33,7 @@ function getTransformer(req, res) {
   }
 
   if (params.output) {
-    res.setHeader('Content-Type', params.output.mime)
+    response.setHeader('Content-Type', params.output.mime)
     tr.toFormat(params.output.format)
 
     if (params.output.progressive) {
