@@ -11,11 +11,7 @@ const loadPlugins = require('./loadPlugins')
 const pkg = require('../package.json')
 
 module.exports = (config, callback) => {
-  if (!semver.satisfies(process.version, pkg.engines.node)) {
-    throw new Error(
-      `Mead requires Node.js ${pkg.engines.node}, you are running ${process.version}`
-    )
-  }
+  assertNodeVersion()
 
   const app = express()
   app.locals.config = config
@@ -52,4 +48,12 @@ function initApp(app, config) {
   app.use(errorHandler)
 
   return app
+}
+
+function assertNodeVersion() {
+  if (!semver.satisfies(process.version, pkg.engines.node)) {
+    throw new Error(
+      `Mead requires Node.js ${pkg.engines.node}, you are running ${process.version}`
+    )
+  }
 }
