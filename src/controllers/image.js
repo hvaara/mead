@@ -1,6 +1,7 @@
 const Boom = require('boom')
 const transformer = require('../transform/transformer')
 const validateTransforms = require('../transform/validate')
+const errorTransformer = require('../transform/errorTransformer')
 
 const mimeTypes = {
   jpeg: 'image/jpeg',
@@ -36,10 +37,11 @@ module.exports = (request, response, next) => {
       .pipe(transformStream)
       .on('error', handleError)
       .pipe(response)
+      .on('error', handleError)
   })
 
   function handleError(err) {
-    next(err.isBoom ? err : Boom.badImplementation(err))
+    next(errorTransformer(err))
   }
 }
 

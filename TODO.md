@@ -2,15 +2,15 @@
 
 - [ ] Write tests
 - [ ] Cache infrastructure + adapter(s)
-- [ ] Cache options + headers
+- [x] Cache options + headers
 - [x] S3 adapter
 - [x] Dockerize
 - [ ] Test and improve error handling
-  - [ ] Non-image urls/files
+  - [x] Non-image urls/files
   - [ ] Invalid images
   - [ ] Timeouts (proxy)
   - [ ] Redirects (proxy)
-  - [ ] Permission errors (fs)
+  - [x] Permission errors (fs)
 - [ ] Add more transformations
   - [ ] Fit params
   - [ ] Crop
