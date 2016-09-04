@@ -7,7 +7,7 @@
 - [x] Dockerize
 - [ ] Test and improve error handling
   - [x] Non-image urls/files
-  - [ ] Invalid images
+  - [x] Invalid images
   - [ ] Timeouts (proxy)
   - [ ] Redirects (proxy)
   - [x] Permission errors (fs)
