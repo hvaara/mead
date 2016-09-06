@@ -12,13 +12,18 @@ const cbOpts = {
 }
 
 const loadPlugins = (app, callback) => {
-  const config = app.locals.config
-  const register = config.plugins.map(plugin => plugin.register).filter(Boolean)
-  const registry = config.plugins.reduce(assignPlugin, {})
+  try {
+    const plugins = app.locals.config.plugins || []
+    const register = plugins.map(plugin => plugin.register).filter(Boolean)
+    const registry = plugins.reduce(assignPlugin, {})
 
-  setImmediate(series, {}, register, {app: app}, responsiveCallback(cbOpts, callback))
+    setImmediate(series, {}, register, {app: app}, responsiveCallback(cbOpts, callback))
 
-  return registry
+    return registry
+  } catch (err) {
+    callback(err)
+    return {}
+  }
 }
 
 function assignPlugin(registry, plugin, index) {

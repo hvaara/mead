@@ -11,25 +11,40 @@ const loadPlugins = require('./loadPlugins')
 const pkg = require('../package.json')
 
 module.exports = (config, callback) => {
-  assertNodeVersion()
+  const versionErr = assertNodeVersion()
+  if (versionErr) {
+    callback(assertNodeVersion)
+    return
+  }
 
   const app = express()
   app.locals.config = config
   app.disable('x-powered-by')
   app.set('trust proxy', config.trustProxy)
 
-  app.locals.plugins = loadPlugins(app, err =>
-    callback(err, err ? undefined : initApp(app, config))
-  )
+  app.locals.plugins = loadPlugins(app, err => {
+    if (err) {
+      callback(err)
+      return
+    }
+
+    initApp(app, config, callback)
+  })
 }
 
-function initApp(app, config) {
+function initApp(app, config, callback) {
   // Always serve the index route
   app.get('/', require('./controllers/index'))
 
   // Dat middleware
+  try {
+    app.use(sourceResolver(app))
+  } catch (err) {
+    callback(err)
+    return
+  }
+
   app.use(favicon(path.join(__dirname, '..', 'assets', 'favicon.ico')))
-  app.use(sourceResolver(app))
   app.use(sourceAdapterLoader)
 
   // Register plugin-based middleware
@@ -47,13 +62,11 @@ function initApp(app, config) {
   // Error handler
   app.use(errorHandler)
 
-  return app
+  setImmediate(callback, null, app)
 }
 
 function assertNodeVersion() {
-  if (!semver.satisfies(process.version, pkg.engines.node)) {
-    throw new Error(
-      `Mead requires Node.js ${pkg.engines.node}, you are running ${process.version}`
-    )
-  }
+  return semver.satisfies(process.version, pkg.engines.node)
+    ? undefined
+    : new Error(`Mead requires Node.js ${pkg.engines.node}, you are running ${process.version}`)
 }

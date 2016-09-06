@@ -10,4 +10,8 @@ module.exports = (plugin, index) => {
   if (!plugin.handler) {
     throw new Error(`Plugin with name "${plugin.name}" did not specify a 'handler'-property`)
   }
+
+  if (typeof plugin.handler !== 'function') {
+    throw new Error(`Plugin with name "${plugin.name}" specified a handler which was not a function`)
+  }
 }

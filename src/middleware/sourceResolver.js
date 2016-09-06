@@ -4,6 +4,10 @@ const patterns = require('../validators/patterns')
 module.exports = app => {
   const {config, plugins} = app.locals
   const requestedResolver = config.sourceResolver
+  if (!requestedResolver) {
+    throw Boom.badImplementation('`sourceResolver` config property must be set')
+  }
+
   const resolvers = plugins['source-resolver'] || {}
   const handler = resolvers[requestedResolver]
   if (!handler) {
