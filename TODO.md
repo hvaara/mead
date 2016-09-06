@@ -1,15 +1,15 @@
 # TODO
 
-- [ ] Write tests
+- [x] Write tests
 - [ ] Cache infrastructure + adapter(s)
 - [x] Cache options + headers
 - [x] S3 adapter
 - [x] Dockerize
-- [ ] Test and improve error handling
+- [x] Test and improve error handling
   - [x] Non-image urls/files
   - [x] Invalid images
-  - [ ] Timeouts (proxy)
-  - [ ] Redirects (proxy)
+  - [x] Timeouts (proxy)
+  - [x] Redirects (proxy)
   - [x] Permission errors (fs)
 - [ ] Add more transformations
   - [ ] Fit params

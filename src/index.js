@@ -56,7 +56,7 @@ function initApp(app, config, callback) {
   app.get(`${pre}/*`, require('./controllers/image'))
 
   if (pre) {
-    app.get(`${pre}`, (req, res) => Boom.badRequest('Source name missing from path'))
+    app.get(`${pre}`, (req, res, next) => next(Boom.notFound('Image path missing from URL')))
   }
 
   // Error handler

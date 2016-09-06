@@ -4,9 +4,9 @@
   "description": "Image thing",
   "main": "src/index.js",
   "scripts": {
-    "coverage": "MEAD_TRUST_PROXY=0 nyc --reporter=html --reporter=text faucet",
-    "test": "tape test/*.test.js | faucet",
-    "tape": "tape test/*.test.js",
+    "coverage": "NODE_ENV=test MEAD_TRUST_PROXY=0 nyc --reporter=html --reporter=text faucet",
+    "test": "NODE_ENV=test tape test/*.test.js | faucet",
+    "tape": "NODE_ENV=test tape test/*.test.js",
     "posttest": "eslint ."
   },
   "bin": {
