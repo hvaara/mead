@@ -1,16 +1,6 @@
 # TODO
 
-- [x] Write tests
 - [ ] Cache infrastructure + adapter(s)
-- [x] Cache options + headers
-- [x] S3 adapter
-- [x] Dockerize
-- [x] Test and improve error handling
-  - [x] Non-image urls/files
-  - [x] Invalid images
-  - [x] Timeouts (proxy)
-  - [x] Redirects (proxy)
-  - [x] Permission errors (fs)
 - [ ] Add more transformations
   - [ ] Fit params
   - [ ] Crop
@@ -23,9 +13,19 @@
   - [ ] Monochrome
   - [ ] Normalize
   - [ ] Watermark
-- [x] Add download flag (dl=<filename>)
 - [ ] Client hints
 - [ ] Metadata
   - [ ] Face detection
 - [ ] Documentation
 - [ ] Website
+- [x] Write tests
+- [x] Cache options + headers
+- [x] S3 adapter
+- [x] Dockerize
+- [x] Add download flag (dl=<filename>)
+- [x] Test and improve error handling
+  - [x] Non-image urls/files
+  - [x] Invalid images
+  - [x] Timeouts (proxy)
+  - [x] Redirects (proxy)
+  - [x] Permission errors (fs)
