@@ -13,3 +13,14 @@ test('index route serves basic info', t => {
       .expect(200, {service: pkg.name}, t.end)
   })
 })
+
+test('favicon route serves favicon', t => {
+  app((err, mead) => {
+    t.ifError(err)
+
+    request(mead)
+      .get('/favicon.ico')
+      .expect('Content-Type', /icon/)
+      .expect(200, t.end)
+  })
+})

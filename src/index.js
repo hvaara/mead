@@ -37,15 +37,14 @@ function initApp(app, config, callback) {
   app.get('/', require('./controllers/index'))
 
   // Dat middleware
+  app.use(favicon(path.join(__dirname, '..', 'assets', 'favicon.ico')))
   try {
     app.use(sourceResolver(app))
+    app.use(sourceAdapterLoader)
   } catch (err) {
     callback(err)
     return
   }
-
-  app.use(favicon(path.join(__dirname, '..', 'assets', 'favicon.ico')))
-  app.use(sourceAdapterLoader)
 
   // Register plugin-based middleware
   values(app.locals.plugins.middleware || {})
