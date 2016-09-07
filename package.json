@@ -4,7 +4,7 @@
   "description": "Image thing",
   "main": "src/index.js",
   "scripts": {
-    "coverage": "NODE_ENV=test MEAD_TRUST_PROXY=0 nyc --reporter=html --reporter=text tape test/*.test.js",
+    "coverage": "NODE_ENV=test MEAD_TRUST_PROXY=0 nyc --reporter=lcov --reporter=html --reporter=text tape test/*.test.js",
     "test": "NODE_ENV=test tape test/*.test.js | faucet",
     "tape": "NODE_ENV=test tape test/*.test.js",
     "posttest": "eslint ."
