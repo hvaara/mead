@@ -1,4 +1,5 @@
 const Boom = require('boom')
+const sharp = require('sharp')
 const transformer = require('../transform/transformer')
 const validateTransforms = require('../transform/validate')
 const errorTransformer = require('../transform/errorTransformer')
@@ -23,21 +24,30 @@ module.exports = (request, response, next) => {
     return
   }
 
-  const transformStream = transformer(params)
-  transformStream.on('info', info => sendHeaders(info, params, response))
-
   sourceAdapter.getImageStream(urlPath, (err, stream) => {
     if (err) {
       handleError(err)
       return
     }
 
+    const imageStream = sharp()
     stream
       .on('error', handleError)
-      .pipe(transformStream)
+      .pipe(imageStream)
       .on('error', handleError)
-      .pipe(response)
-      .on('error', handleError)
+
+    imageStream.metadata((imgErr, meta) => {
+      if (imgErr) {
+        handleError(imgErr)
+        return
+      }
+
+      const transformStream = transformer(imageStream, params, meta)
+      transformStream
+        .on('info', info => sendHeaders(info, params, response))
+        .pipe(response)
+        .on('error', handleError)
+    })
   })
 
   function handleError(err) {

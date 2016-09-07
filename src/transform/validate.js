@@ -9,7 +9,8 @@ const queryMap = {
   fm: ['output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
   rot: ['rotation', num, enumz([0, 90, 180, 270])],
   flip: ['flip', enumz(['h', 'v', 'hv'])],
-  dl: ['download', identity]
+  dl: ['download', identity],
+  fit: ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale'])] // 'clamp', 'min', 'facearea'
 }
 
 function validateTransforms(qs) {
