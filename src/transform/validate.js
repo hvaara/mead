@@ -10,7 +10,7 @@ const queryMap = {
   rot: ['rotation', num, enumz([0, 90, 180, 270])],
   flip: ['flip', enumz(['h', 'v', 'hv'])],
   dl: ['download', identity],
-  fit: ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale'])] // 'clamp', 'min', 'facearea'
+  fit: ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])]
 }
 
 function validateTransforms(qs) {

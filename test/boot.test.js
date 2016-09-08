@@ -2,7 +2,7 @@ const test = require('tape')
 const mead = require('..')
 const {fixtures, config} = require('./helpers')
 
-test('errors if no sourceResolver is set', t => {
+test('[boot] errors if no sourceResolver is set', t => {
   mead({}, err => {
     t.instanceOf(err, Error)
     t.include(err.message, 'sourceResolver')
@@ -10,7 +10,7 @@ test('errors if no sourceResolver is set', t => {
   })
 })
 
-test('errors if plugin fails to register', t => {
+test('[boot] errors if plugin fails to register', t => {
   mead({plugins: [fixtures.plugin({registerError: true})]}, err => {
     t.instanceOf(err, Error)
     t.equal(err.message, 'some error')
@@ -18,7 +18,7 @@ test('errors if plugin fails to register', t => {
   })
 })
 
-test('errors if defined sourceResolver is not found', t => {
+test('[boot] errors if defined sourceResolver is not found', t => {
   mead({sourceResolver: 'foo'}, err => {
     t.instanceOf(err, Error)
     t.include(err.message, '"foo" not found')
@@ -26,7 +26,7 @@ test('errors if defined sourceResolver is not found', t => {
   })
 })
 
-test('errors on duplicate plugin names within same type', t => {
+test('[boot] errors on duplicate plugin names within same type', t => {
   mead({plugins: [fixtures.plugin(), fixtures.plugin()]}, err => {
     t.instanceOf(err, Error)
     t.include(err.message, 'unique within a type')
@@ -34,7 +34,7 @@ test('errors on duplicate plugin names within same type', t => {
   })
 })
 
-test('default config should error because of missing sources', t => {
+test('[boot] default config should error because of missing sources', t => {
   mead(config({sources: []}), err => {
     t.instanceOf(err, Error)
     t.include(err.message, 'No sources configured')
@@ -42,7 +42,7 @@ test('default config should error because of missing sources', t => {
   })
 })
 
-test('errors on plugins without a name', t => {
+test('[boot] errors on plugins without a name', t => {
   mead(config({plugins: [fixtures.plugin({name: ''})]}), err => {
     t.instanceOf(err, Error)
     t.include(err.message, "'name'-property")
@@ -50,7 +50,7 @@ test('errors on plugins without a name', t => {
   })
 })
 
-test('errors on plugins without a type', t => {
+test('[boot] errors on plugins without a type', t => {
   mead(config({plugins: [fixtures.plugin({type: ''})]}), err => {
     t.instanceOf(err, Error)
     t.include(err.message, "'type'-property")
@@ -58,7 +58,7 @@ test('errors on plugins without a type', t => {
   })
 })
 
-test('errors on plugins without a handler', t => {
+test('[boot] errors on plugins without a handler', t => {
   mead(config({plugins: [fixtures.plugin({handler: ''})]}), err => {
     t.instanceOf(err, Error)
     t.include(err.message, "'handler'-property")
@@ -66,7 +66,7 @@ test('errors on plugins without a handler', t => {
   })
 })
 
-test('errors on plugins with a non-function handler', t => {
+test('[boot] errors on plugins with a non-function handler', t => {
   mead(config({plugins: [fixtures.plugin({handler: 'foo'})]}), err => {
     t.instanceOf(err, Error)
     t.include(err.message, 'not a function')
@@ -74,7 +74,7 @@ test('errors on plugins with a non-function handler', t => {
   })
 })
 
-test('given a source, default config should yield app', t => {
+test('[boot] given a source, default config should yield app', t => {
   mead(config({sources: [{name: 'foo', adapter: {type: 'proxy'}}]}), (err, app) => {
     t.ifError(err, 'no error')
     t.isFunction(app.listen)

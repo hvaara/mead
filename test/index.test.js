@@ -3,7 +3,7 @@ const request = require('supertest')
 const {app} = require('./helpers')
 const pkg = require('../package.json')
 
-test('index route serves basic info', t => {
+test('[index] index route serves basic info', t => {
   app((err, mead) => {
     t.ifError(err)
 
@@ -14,7 +14,7 @@ test('index route serves basic info', t => {
   })
 })
 
-test('favicon route serves favicon', t => {
+test('[index] favicon route serves favicon', t => {
   app((err, mead) => {
     t.ifError(err)
 

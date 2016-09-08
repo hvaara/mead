@@ -29,12 +29,35 @@ function fit(tr, params, meta) {
       return extendToSize(tr.withoutEnlargement(), params, meta)
     case 'max':
       return tr.withoutEnlargement().max()
+    case 'min':
+      return cropToCenter(tr.withoutEnlargement(), params, meta)
     case 'scale':
       return tr.ignoreAspectRatio()
     case 'clip':
     default:
       return tr.max()
   }
+}
+
+function cropToCenter(tr, params, meta) {
+  const targetAspect = params.width / params.height
+
+  const width = Math.min(params.width || +Infinity, meta.width)
+  const height = Math.min(params.height || +Infinity, meta.height)
+  const isLandscape = width > height
+
+  let targetWidth = Math.round(isLandscape ? width : height * targetAspect)
+  let targetHeight = Math.round(isLandscape ? width / targetAspect : height)
+
+  if (targetHeight > meta.height) {
+    targetHeight = meta.height
+    targetWidth = Math.round(meta.height * targetAspect)
+  }
+
+  tr.resize(targetWidth, targetHeight)
+  tr.crop()
+
+  return tr
 }
 
 function extendToSize(tr, params, meta) {
