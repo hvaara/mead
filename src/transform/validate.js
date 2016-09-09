@@ -2,15 +2,18 @@
 const Color = require('color')
 
 const queryMap = {
-  w: ['width', num],
-  h: ['height', num],
-  q: ['quality', numBetween(0, 100)],
-  bg: ['backgroundColor', color],
-  fm: ['output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
-  rot: ['rotation', num, enumz([0, 90, 180, 270])],
-  flip: ['flip', enumz(['h', 'v', 'hv'])],
-  dl: ['download', identity],
-  fit: ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])]
+  'w': ['width', num],
+  'h': ['height', num],
+  'q': ['quality', numBetween(0, 100)],
+  'bg': ['backgroundColor', color],
+  'fm': ['output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
+  'rot': ['rotation', num, enumz([0, 90, 180, 270])],
+  'flip': ['flip', enumz(['h', 'v', 'hv'])],
+  'dl': ['download', identity],
+  'fit': ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])],
+  'fp-debug': ['focalPointTarget', presenceBool],
+  'fp-x': ['focalPointX', numBetween(0, 1)],
+  'fp-y': ['focalPointY', numBetween(0, 2)]
 }
 
 function validateTransforms(qs) {
@@ -63,6 +66,10 @@ function enumz(values) {
 
     return value
   }
+}
+
+function presenceBool() {
+  return true
 }
 
 function color(param, value) {

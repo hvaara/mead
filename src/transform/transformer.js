@@ -1,4 +1,5 @@
-const pipeline = [quality, size, fit, rotation, background, flip, output]
+const drawCrosshairs = require('../draw/drawCrosshairs')
+const pipeline = [quality, fit, resize, rotation, background, flip, output]
 
 function getTransformer(tr, params, meta) {
   pipeline.forEach(mod => mod(tr, params, meta))
@@ -9,41 +10,157 @@ function quality(tr, params) {
   tr.quality(params.quality || 75)
 }
 
-function size(tr, params) {
-  if (params.width || params.height) {
+function resize(tr, params) {
+  if (!params.skipResize && (params.width || params.height)) {
     tr.resize(params.width, params.height)
   }
 }
 
-function fit(tr, params, meta) {
-  if (!params.fit) {
-    return tr.max()
+function guessSizeFromParams(params, meta) {
+  const {width, height} = params
+  if (width && height) {
+    return {width, height}
   }
 
+  if (width) {
+    return {width, height: width / (meta.width / meta.height)}
+  }
+
+  return {width: height * (meta.width / meta.height), height}
+}
+
+function fit(tr, params, meta) {
   switch (params.fit) {
     case 'crop':
-      return tr
+      return fitCrop(...arguments)
     case 'fill':
       return tr.embed()
     case 'fillmax':
-      return extendToSize(tr.withoutEnlargement(), params, meta)
+      return fitFillMax(...arguments)
     case 'max':
       return tr.withoutEnlargement().max()
     case 'min':
-      return cropToCenter(tr.withoutEnlargement(), params, meta)
+      return fitMin(...arguments)
     case 'scale':
-      return tr.ignoreAspectRatio()
+      return fitScale(...arguments)
     case 'clip':
     default:
       return tr.max()
   }
 }
 
-function cropToCenter(tr, params, meta) {
-  const targetAspect = params.width / params.height
+function fitScale(tr, params) {
+  const hasExactSize = params.width && params.height
+  if (hasExactSize) {
+    tr.ignoreAspectRatio()
+  } else {
+    tr.max()
+  }
+}
 
-  const width = Math.min(params.width || +Infinity, meta.width)
-  const height = Math.min(params.height || +Infinity, meta.height)
+function fitFillMax(tr, params, meta) {
+  tr.withoutEnlargement().max()
+
+  if ((!params.height && params.width < meta.width)
+    || (!params.width && params.height < meta.height)) {
+    return
+  }
+
+  const aspect = meta.width / meta.height
+
+  const targetWidth = params.width || Math.round(params.height * aspect)
+  const targetHeight = params.height || Math.round(params.width / aspect)
+
+  let resizeWidth = Math.min(targetWidth, meta.width)
+  let resizeHeight = Math.min(targetHeight, meta.height)
+
+  if ((resizeWidth / resizeHeight) > aspect) {
+    resizeWidth = resizeHeight * aspect
+  } else {
+    resizeHeight = resizeWidth / aspect
+  }
+
+  const addWidth = (targetWidth - Math.round(resizeWidth)) / 2
+  const addHeight = (targetHeight - Math.round(resizeHeight)) / 2
+
+  tr.extend({
+    top: Math.max(0, Math.ceil(addHeight)),
+    bottom: Math.max(0, Math.floor(addHeight)),
+    left: Math.max(0, Math.ceil(addWidth)),
+    right: Math.max(0, Math.floor(addWidth))
+  })
+}
+
+function fitCrop(tr, params, meta) {
+  params.outputSize = guessSizeFromParams(params, meta)
+  params.skipResize = true
+
+  const originalRatio = meta.width / meta.height
+
+  const targetWidth = params.outputSize.width
+  const targetHeight = params.outputSize.height
+
+  let resizeWidth = targetWidth
+  let resizeHeight = targetHeight
+
+  if ((resizeWidth / resizeHeight) < originalRatio) {
+    resizeWidth = resizeHeight * originalRatio
+  } else {
+    resizeHeight = resizeWidth / originalRatio
+  }
+
+  tr.resize(
+    Math.round(resizeWidth),
+    Math.round(resizeHeight)
+  )
+
+  const focal = {x: params.focalPointX || 0.5, y: params.focalPointY || 0.5}
+  const center = {
+    x: (resizeWidth * focal.x) - (targetWidth / 2),
+    y: (resizeHeight * focal.y) - (targetHeight / 2)
+  }
+
+  const pos = {
+    left: clamp(center.x, 0, resizeWidth - targetWidth),
+    top: clamp(center.y, 0, resizeHeight - targetHeight)
+  }
+
+  const crop = {
+    left: Math.round(pos.left),
+    top: Math.round(pos.top),
+    width: Math.round(targetWidth),
+    height: Math.round(targetHeight)
+  }
+
+  if (params.focalPointTarget) {
+    const focalCoords = {
+      x: (resizeWidth * focal.x) - pos.left,
+      y: (resizeHeight * focal.y) - pos.top
+    }
+
+    const crossHairs = drawCrosshairs(
+      {width: targetWidth, height: targetHeight},
+      focalCoords
+    )
+
+    tr.overlayWith(Buffer.from(crossHairs, 'utf8'), {top: 0, left: 0})
+  }
+
+  tr.extract(crop)
+}
+
+function clamp(inp, min, max) {
+  return Math.min(max, Math.max(min, Math.round(inp)))
+}
+
+function fitMin(tr, params, meta) {
+  tr.withoutEnlargement()
+
+  params.outputSize = guessSizeFromParams(params, meta)
+  const targetAspect = params.outputSize.width / params.outputSize.height
+
+  const width = Math.min(params.outputSize.width || +Infinity, meta.width)
+  const height = Math.min(params.outputSize.height || +Infinity, meta.height)
   const isLandscape = width > height
 
   let targetWidth = Math.round(isLandscape ? width : height * targetAspect)
@@ -56,28 +173,6 @@ function cropToCenter(tr, params, meta) {
 
   tr.resize(targetWidth, targetHeight)
   tr.crop()
-
-  return tr
-}
-
-function extendToSize(tr, params, meta) {
-  const aspect = meta.width / meta.height
-
-  const width = Math.min(params.width || +Infinity, meta.width)
-  const height = Math.min(params.height || +Infinity, meta.height)
-
-  const targetWidth = params.width || (params.height * aspect)
-  const targetHeight = params.height || (params.width / aspect)
-
-  const addWidth = (targetWidth - width) / 2
-  const addHeight = (targetHeight - height) / 2
-
-  tr.extend({
-    top: Math.ceil(addHeight),
-    bottom: Math.floor(addHeight),
-    left: Math.ceil(addWidth),
-    right: Math.floor(addWidth)
-  })
 
   return tr
 }

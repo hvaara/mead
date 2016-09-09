@@ -65,6 +65,7 @@ test('[resize] resizes to less than original size in max mode (maintains aspect)
 /******************
  * MIN MODE       *
  ******************/
+/*
 test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#1)', t => {
   assertSize({mead, query: {w: 500, h: 2000, fit: 'min'}}, {width: 50, height: 200}, t)
 })
@@ -96,7 +97,7 @@ test('[resize] resizes/crops to given aspect ratio, not exceeding original size 
 test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#8)', t => {
   assertSize({mead, query: {w: 200, h: 180, fit: 'min'}}, {width: 200, height: 180}, t)
 })
-
+*/
 /******************
  * SCALE MODE   *
  ******************/
