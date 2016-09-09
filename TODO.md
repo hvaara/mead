@@ -2,7 +2,8 @@
 
 - [ ] Cache infrastructure + adapter(s)
 - [ ] Add more transformations
-  - [ ] Fit params
+  - [x] Fit params
+  - [x] Focal point
   - [ ] Crop
   - [ ] Trim
   - [ ] Extend (border)
