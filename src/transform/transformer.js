@@ -154,27 +154,29 @@ function clamp(inp, min, max) {
 }
 
 function fitMin(tr, params, meta) {
-  tr.withoutEnlargement()
-
   params.outputSize = guessSizeFromParams(params, meta)
-  const targetAspect = params.outputSize.width / params.outputSize.height
+  params.skipResize = true
 
-  const width = Math.min(params.outputSize.width || +Infinity, meta.width)
-  const height = Math.min(params.outputSize.height || +Infinity, meta.height)
-  const isLandscape = width > height
+  const targetWidth = Math.round(params.outputSize.width)
+  const targetHeight = Math.round(params.outputSize.height)
 
-  let targetWidth = Math.round(isLandscape ? width : height * targetAspect)
-  let targetHeight = Math.round(isLandscape ? width / targetAspect : height)
+  tr.withoutEnlargement().resize(targetWidth, targetHeight).crop()
 
-  if (targetHeight > meta.height) {
-    targetHeight = meta.height
-    targetWidth = Math.round(meta.height * targetAspect)
+  if (targetWidth < meta.width && targetHeight < meta.height) {
+    return
   }
 
-  tr.resize(targetWidth, targetHeight)
-  tr.crop()
+  const originalRatio = meta.width / meta.height
+  const targetRatio = targetWidth / targetHeight
 
-  return tr
+  let newWidth = Math.round(targetRatio * meta.height)
+  let newHeight = meta.height
+  if (targetRatio > originalRatio) {
+    newWidth = meta.width
+    newHeight = Math.round(meta.width / targetRatio)
+  }
+
+  tr.resize(newWidth, newHeight).crop()
 }
 
 function rotation(tr, params) {
