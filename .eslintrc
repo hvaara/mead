@@ -3,5 +3,8 @@
     "node": true,
     "es6": true
   },
-  "extends": "bengler"
+  "extends": "bengler",
+  "rules": {
+    "prefer-rest-params": 0
+  }
 }
