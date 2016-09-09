@@ -5,7 +5,7 @@
   - [x] Fit params
   - [x] Focal point
   - [x] Crop
-  - [ ] Trim
+  - [x] Trim
   - [ ] Extend (border)
   - [ ] Invert
   - [ ] Blur

@@ -13,6 +13,8 @@ const queryMap = {
   'dl': ['download', identity],
   'fit': ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])],
   'crop': ['crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
+  'trim': ['trim', enumz(['auto', 'color'])],
+  'trimtol': ['trimTolerance', numBetween(1, 50)],
   'fp-debug': ['focalPointTarget', presenceBool],
   'fp-x': ['focalPointX', numBetween(0, 1)],
   'fp-y': ['focalPointY', numBetween(0, 2)]

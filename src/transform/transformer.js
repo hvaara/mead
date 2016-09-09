@@ -1,6 +1,6 @@
 const sharp = require('sharp')
 const drawCrosshairs = require('../draw/drawCrosshairs')
-const pipeline = [quality, fit, resize, rotation, background, flip, output]
+const pipeline = [quality, trim, fit, resize, rotation, background, flip, output]
 
 function getTransformer(tr, params, meta) {
   pipeline.forEach(mod => mod(tr, params, meta))
@@ -9,6 +9,18 @@ function getTransformer(tr, params, meta) {
 
 function quality(tr, params) {
   tr.quality(params.quality || 75)
+}
+
+function trim(tr, params) {
+  if (!params.trim) {
+    return tr
+  }
+
+  if (params.trim === 'auto') {
+    return tr.trim()
+  }
+
+  return tr.trim(params.trimTolerance || undefined)
 }
 
 function resize(tr, params) {
