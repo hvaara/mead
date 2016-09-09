@@ -1,3 +1,4 @@
+const sharp = require('sharp')
 const drawCrosshairs = require('../draw/drawCrosshairs')
 const pipeline = [quality, fit, resize, rotation, background, flip, output]
 
@@ -91,9 +92,43 @@ function fitFillMax(tr, params, meta) {
   })
 }
 
+function gravityCrop(tr, params, meta) {
+  const cropType = typeof params.crop === 'string'
+    ? sharp.strategy[params.crop]
+    : params.crop
+
+  tr
+    .resize(params.width, params.height)
+    .crop(cropType || 'center')
+}
+
+function getFocalCoords(params) {
+  const map = {
+    [sharp.gravity.west]: {x: 0, y: 0.5},
+    [sharp.gravity.east]: {x: 1, y: 0.5},
+    [sharp.gravity.north]: {x: 0.5, y: 0},
+    [sharp.gravity.south]: {x: 0.5, y: 1},
+    [sharp.gravity.northwest]: {x: 0, y: 0},
+    [sharp.gravity.northeast]: {x: 1, y: 0},
+    [sharp.gravity.southwest]: {x: 0, y: 1},
+    [sharp.gravity.southeast]: {x: 1, y: 1}
+  }
+
+  const coords = map[params.crop] || {x: 0.5, y: 0.5}
+  coords.x = isDefined(params.focalPointX) ? params.focalPointX : coords.x
+  coords.y = isDefined(params.focalPointY) ? params.focalPointY : coords.y
+
+  return coords
+}
+
 function fitCrop(tr, params, meta) {
   params.outputSize = guessSizeFromParams(params, meta)
   params.skipResize = true
+
+  if (typeof params.focalPointX === 'undefined' && typeof params.focalPointY === 'undefined') {
+    gravityCrop(...arguments)
+    return
+  }
 
   const originalRatio = meta.width / meta.height
 
@@ -114,7 +149,7 @@ function fitCrop(tr, params, meta) {
     Math.round(resizeHeight)
   )
 
-  const focal = {x: params.focalPointX || 0.5, y: params.focalPointY || 0.5}
+  const focal = getFocalCoords(params)
   const center = {
     x: (resizeWidth * focal.x) - (targetWidth / 2),
     y: (resizeHeight * focal.y) - (targetHeight / 2)
@@ -219,6 +254,10 @@ function output(tr, params) {
   if (out.progressive) {
     tr.progressive()
   }
+}
+
+function isDefined(thing) {
+  return typeof thing !== 'undefined'
 }
 
 module.exports = getTransformer

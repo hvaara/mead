@@ -4,7 +4,7 @@
 - [ ] Add more transformations
   - [x] Fit params
   - [x] Focal point
-  - [ ] Crop
+  - [x] Crop
   - [ ] Trim
   - [ ] Extend (border)
   - [ ] Invert
@@ -14,6 +14,7 @@
   - [ ] Monochrome
   - [ ] Normalize
   - [ ] Watermark
+  - [ ] Focal point zoom
 - [ ] Client hints
 - [ ] Metadata
   - [ ] Face detection

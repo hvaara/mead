@@ -1,5 +1,6 @@
 /* eslint-disable id-length */
 const Color = require('color')
+const sharp = require('sharp')
 
 const queryMap = {
   'w': ['width', num],
@@ -11,6 +12,7 @@ const queryMap = {
   'flip': ['flip', enumz(['h', 'v', 'hv'])],
   'dl': ['download', identity],
   'fit': ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])],
+  'crop': ['crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
   'fp-debug': ['focalPointTarget', presenceBool],
   'fp-x': ['focalPointX', numBetween(0, 1)],
   'fp-y': ['focalPointY', numBetween(0, 2)]
@@ -58,10 +60,14 @@ function numBetween(min, max) {
   }
 }
 
+function getOneOf(values) {
+  return `must be one of: [${values.map(quote).join(', ')}]`
+}
+
 function enumz(values) {
   return (param, value) => {
     if (!values.includes(value)) {
-      throw new Error(`Parameter "${param}" must be one of: [${values.map(quote).join(', ')}]`)
+      throw new Error(`Parameter "${param}" - ${getOneOf(values)}`)
     }
 
     return value
@@ -120,6 +126,42 @@ function mime(formatter) {
       mime: `image/${normal}`,
       progressive
     }
+  }
+}
+
+const cropPositionMap = {
+  top: 'north',
+  bottom: 'south',
+  left: 'west',
+  right: 'east'
+}
+
+function crop(values) {
+  return (param, value) => {
+    const modifiers = value.split(',')
+    const gravity = modifiers
+      .map(mapPositional)
+      .filter(Boolean)
+      .sort(sortPositional)
+      .join('')
+
+    return sharp.gravity[gravity] || modifiers.filter(mod => !mapPositional(mod)).shift()
+  }
+
+  function mapPositional(val) {
+    if (!values.includes(val)) {
+      throw new Error(`Value "${val}" not recognized for parameter "crop", ${getOneOf(values)}`)
+    }
+
+    return cropPositionMap[val] || false
+  }
+
+  function sortPositional(a, b) {
+    if (a === b) {
+      return 0
+    }
+
+    return a === 'north' || a === 'south' ? -1 : 1
   }
 }
 
