@@ -1,12 +1,15 @@
 # TODO
 
 - [ ] Cache infrastructure + adapter(s)
+- [ ] Limits (input/output size etc)
+- [ ] Disable transformations
+- [ ] Pluggable transformations
 - [ ] Add more transformations
   - [x] Fit params
   - [x] Focal point
   - [x] Crop
   - [x] Trim
-  - [ ] Extend (border)
+  - [x] Extend (border)
   - [ ] Invert
   - [ ] Blur
   - [ ] Sharpen
@@ -31,3 +34,6 @@
   - [x] Timeouts (proxy)
   - [x] Redirects (proxy)
   - [x] Permission errors (fs)
+  - [ ] Borders/padding larger than image
+  - [ ] Duplicate query string parameters (tests)
+  - [ ] Floats vs integers (tests)

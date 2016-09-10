@@ -4,6 +4,9 @@ const drawBorder = require('../draw/drawBorder')
 const drawContainer = require('../draw/drawContainer')
 const getOutputSize = require('./outputSize')
 
+const defaultBgColorAlpha = {r: 255, g: 255, b: 255, a: 0} // eslint-disable-line id-length
+const defaultBgColor = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
+
 const pipeline = [
   quality,
   trim,
@@ -12,6 +15,7 @@ const pipeline = [
   rotation,
   background,
   flip,
+  pad,
   border,
   overlays,
   output
@@ -57,9 +61,7 @@ function resize(tr, params) {
 function guessSizeFromParams(params, meta, opts = {}) {
   const filter = opts.round ? size => ({
     width: Math.round(size.width),
-    height: Math.round(size.height),
-    canvasWidth: Math.round(size.canvasWidth),
-    canvasHeight: Math.round(size.canvasHeight)
+    height: Math.round(size.height)
   }) : inp => inp
 
   return filter(getOutputSize(params, meta, opts))
@@ -139,8 +141,8 @@ function fitFillMax(tr, params, meta) {
     right: Math.max(0, Math.floor(addWidth))
   }
 
-  params.outputSize.canvasWidth += extendBy.left + extendBy.right
-  params.outputSize.canvasHeight += extendBy.top + extendBy.bottom
+  params.outputSize.width += extendBy.left + extendBy.right
+  params.outputSize.height += extendBy.top + extendBy.bottom
 
   tr.extend(extendBy)
 }
@@ -224,8 +226,8 @@ function fitCrop(tr, params, meta) {
     round: true,
     sizeMode: 'crop'
   }), {
-    canvasWidth: crop.width,
-    canvasHeight: crop.height
+    width: crop.width,
+    height: crop.height
   })
 
   tr.extract(crop)
@@ -258,9 +260,7 @@ function fitMin(tr, params, meta) {
 
   params.outputSize = Object.assign(params.outputSize, {
     width: newWidth,
-    height: newHeight,
-    canvasWidth: newWidth,
-    canvasHeight: newHeight
+    height: newHeight
   })
 
   tr.resize(newWidth, newHeight).crop()
@@ -313,12 +313,15 @@ function rotation(tr, params) {
   }
 }
 
-function background(tr, params) {
+function background(tr, params, meta) {
   if (params.backgroundColor) {
-    // @todo Might have to call flatten or similar if going from gif/png
-    // to jpeg, in order for the background color to apply
     tr.background(params.backgroundColor)
+    return
   }
+
+  const format = (params.output && params.output.format) || meta.format
+  const hasAlpha = format !== 'jpeg'
+  tr.background(hasAlpha ? defaultBgColorAlpha : defaultBgColor)
 }
 
 function flip(tr, params) {
@@ -351,9 +354,8 @@ function border(tr, params, meta) {
     return
   }
 
-  const {canvasWidth, canvasHeight} = params.outputSize
   const borderImg = drawBorder(
-    {width: canvasWidth, height: canvasHeight},
+    params.outputSize,
     params.border.size,
     params.border.color
   )
@@ -362,19 +364,48 @@ function border(tr, params, meta) {
   params.overlays.push(borderImg)
 }
 
+function pad(tr, params, meta) {
+  if (!params.pad) {
+    return
+  }
+
+  if (params.width || params.height) {
+    const size = params.pad * 2
+    const width = params.width ? params.width - size : undefined
+    const height = params.height ? params.height - size : undefined
+
+    tr.resize(width, height)
+
+    const newSize = getNewSize({width, height}, meta)
+    params.outputSize = {
+      width: newSize.width + size,
+      height: newSize.height + size
+    }
+  }
+
+  tr.extend(params.pad)
+}
+
 function overlays(tr, params, meta) {
   const content = params.overlays
   if (!content || content.length === 0) {
     return
   }
 
-  const {canvasWidth, canvasHeight} = params.outputSize
-  const container = drawContainer(
-    {width: canvasWidth, height: canvasHeight},
-    content
-  )
+  const container = drawContainer(params.outputSize, content)
+  tr.overlayWith(Buffer.from(container, 'utf8'), {})
+}
 
-  tr.overlayWith(Buffer.from(container, 'utf8'), {top: 0, left: 0})
+function getNewSize(target, original) {
+  const newSize = Object.assign({}, target)
+
+  if (target.width) {
+    newSize.height = (target.width * original.height) / original.width
+  } else {
+    newSize.width = (target.height * original.width) / original.height
+  }
+
+  return newSize
 }
 
 function isDefined(thing) {

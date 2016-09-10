@@ -21,15 +21,13 @@ function getOutputParamsFromExactSize(out, params, meta, sizeMode) {
     }
   } else if (sizeMode === 'embed') {
     if (out.xFactor > out.yFactor) {
-      out.height = Math.round(meta.height / out.xFactor)
       out.yFactor = out.xFactor
     } else {
-      out.width = Math.round(meta.width / out.yFactor)
       out.xFactor = out.yFactor
     }
 
-    out.canvasWidth = params.width
-    out.canvasHeight = params.height
+    out.width = params.width
+    out.height = params.height
   } else if (sizeMode === 'max') {
     if (out.xFactor > out.yFactor) {
       out.height = Math.round(meta.height / out.xFactor)
@@ -113,8 +111,5 @@ module.exports = function getOutputSize(params, meta, opts = {}) {
     out.height = meta.height
   }
 
-  return Object.assign({
-    canvasWidth: out.width,
-    canvasHeight: out.height
-  }, out)
+  return out
 }

@@ -15,6 +15,7 @@ const queryMap = {
   'crop': ['crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
   'trim': ['trim', enumz(['auto', 'color'])],
   'trimtol': ['trimTolerance', intBetween(1, 50)],
+  'pad': ['pad', int],
   'border': ['border', split, border],
   'fp-debug': ['focalPointTarget', presenceBool],
   'fp-x': ['focalPointX', numBetween(0, 1)],
