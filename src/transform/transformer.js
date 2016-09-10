@@ -9,11 +9,14 @@ const defaultBgColor = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
 
 const pipeline = [
   quality,
+  background,
+  invert,
+  sharpen,
+  blur,
   trim,
   fit,
   resize,
   rotation,
-  background,
   flip,
   pad,
   border,
@@ -38,6 +41,24 @@ function getTransformer(tr, params, meta) {
 
 function quality(tr, params) {
   tr.quality(params.quality || 75)
+}
+
+function invert(tr, params) {
+  if (params.invert) {
+    tr.negate()
+  }
+}
+
+function sharpen(tr, params) {
+  if (params.sharpen) {
+    tr.sharpen(parseInt(params.sharpen / 30, 10) || undefined)
+  }
+}
+
+function blur(tr, params) {
+  if (params.blur) {
+    tr.blur(params.blur ? Math.max(0.3, params.blur / 8) : undefined)
+  }
 }
 
 function trim(tr, params) {

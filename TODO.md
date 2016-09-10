@@ -11,8 +11,8 @@
   - [x] Trim
   - [x] Extend (border)
   - [x] Invert
-  - [ ] Blur
-  - [ ] Sharpen
+  - [x] Blur
+  - [x] Sharpen
   - [ ] DPR
   - [ ] Monochrome
   - [ ] Normalize
@@ -22,6 +22,7 @@
 - [ ] Metadata
   - [ ] Face detection
 - [ ] Documentation
+  - [ ] Document slowness of sharpen
 - [ ] Website
 - [x] Write tests
 - [x] Cache options + headers
