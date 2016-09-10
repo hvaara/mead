@@ -1,6 +1,31 @@
 const sharp = require('sharp')
 const drawCrosshairs = require('../draw/drawCrosshairs')
-const pipeline = [quality, trim, fit, resize, rotation, background, flip, output]
+const drawBorder = require('../draw/drawBorder')
+const drawContainer = require('../draw/drawContainer')
+const getOutputSize = require('./outputSize')
+
+const pipeline = [
+  quality,
+  trim,
+  fit,
+  resize,
+  rotation,
+  background,
+  flip,
+  border,
+  overlays,
+  output
+]
+
+const fitHandlers = {
+  crop: fitCrop,
+  fill: fitFill,
+  fillmax: fitFillMax,
+  max: fitMax,
+  min: fitMin,
+  scale: fitScale,
+  clip: fitClip
+}
 
 function getTransformer(tr, params, meta) {
   pipeline.forEach(mod => mod(tr, params, meta))
@@ -29,50 +54,61 @@ function resize(tr, params) {
   }
 }
 
-function guessSizeFromParams(params, meta) {
-  const {width, height} = params
-  if (width && height) {
-    return {width, height}
-  }
+function guessSizeFromParams(params, meta, opts = {}) {
+  const filter = opts.round ? size => ({
+    width: Math.round(size.width),
+    height: Math.round(size.height),
+    canvasWidth: Math.round(size.canvasWidth),
+    canvasHeight: Math.round(size.canvasHeight)
+  }) : inp => inp
 
-  if (width) {
-    return {width, height: width / (meta.width / meta.height)}
-  }
-
-  return {width: height * (meta.width / meta.height), height}
+  return filter(getOutputSize(params, meta, opts))
 }
 
 function fit(tr, params, meta) {
-  switch (params.fit) {
-    case 'crop':
-      return fitCrop(...arguments)
-    case 'fill':
-      return tr.embed()
-    case 'fillmax':
-      return fitFillMax(...arguments)
-    case 'max':
-      return tr.withoutEnlargement().max()
-    case 'min':
-      return fitMin(...arguments)
-    case 'scale':
-      return fitScale(...arguments)
-    case 'clip':
-    default:
-      return tr.max()
-  }
+  const handler = fitHandlers[params.fit] || fitClip
+  handler(...arguments)
 }
 
-function fitScale(tr, params) {
+function fitFill(tr, params, meta) {
+  tr.embed()
+  params.outputSize = guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: 'embed'
+  })
+}
+
+function fitClip(tr, params, meta) {
+  tr.max()
+  params.outputSize = guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: 'max'
+  })
+}
+
+function fitScale(tr, params, meta) {
   const hasExactSize = params.width && params.height
+
   if (hasExactSize) {
     tr.ignoreAspectRatio()
   } else {
     tr.max()
   }
+
+  params.outputSize = guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: hasExactSize ? 'ignoreAspect' : 'max'
+  })
 }
 
 function fitFillMax(tr, params, meta) {
   tr.withoutEnlargement().max()
+
+  params.outputSize = guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: 'max',
+    withoutEnlargement: true
+  })
 
   if ((!params.height && params.width < meta.width)
     || (!params.width && params.height < meta.height)) {
@@ -96,51 +132,41 @@ function fitFillMax(tr, params, meta) {
   const addWidth = (targetWidth - Math.round(resizeWidth)) / 2
   const addHeight = (targetHeight - Math.round(resizeHeight)) / 2
 
-  tr.extend({
+  const extendBy = {
     top: Math.max(0, Math.ceil(addHeight)),
     bottom: Math.max(0, Math.floor(addHeight)),
     left: Math.max(0, Math.ceil(addWidth)),
     right: Math.max(0, Math.floor(addWidth))
+  }
+
+  params.outputSize.canvasWidth += extendBy.left + extendBy.right
+  params.outputSize.canvasHeight += extendBy.top + extendBy.bottom
+
+  tr.extend(extendBy)
+}
+
+function fitMax(tr, params, meta) {
+  tr.withoutEnlargement().max()
+
+  params.outputSize = guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: 'max',
+    withoutEnlargement: true
   })
 }
 
-function gravityCrop(tr, params, meta) {
-  const cropType = typeof params.crop === 'string'
-    ? sharp.strategy[params.crop]
-    : params.crop
-
-  tr
-    .resize(params.width, params.height)
-    .crop(cropType || 'center')
-}
-
-function getFocalCoords(params) {
-  const map = {
-    [sharp.gravity.west]: {x: 0, y: 0.5},
-    [sharp.gravity.east]: {x: 1, y: 0.5},
-    [sharp.gravity.north]: {x: 0.5, y: 0},
-    [sharp.gravity.south]: {x: 0.5, y: 1},
-    [sharp.gravity.northwest]: {x: 0, y: 0},
-    [sharp.gravity.northeast]: {x: 1, y: 0},
-    [sharp.gravity.southwest]: {x: 0, y: 1},
-    [sharp.gravity.southeast]: {x: 1, y: 1}
-  }
-
-  const coords = map[params.crop] || {x: 0.5, y: 0.5}
-  coords.x = isDefined(params.focalPointX) ? params.focalPointX : coords.x
-  coords.y = isDefined(params.focalPointY) ? params.focalPointY : coords.y
-
-  return coords
-}
-
 function fitCrop(tr, params, meta) {
-  params.outputSize = guessSizeFromParams(params, meta)
   params.skipResize = true
 
   if (typeof params.focalPointX === 'undefined' && typeof params.focalPointY === 'undefined') {
-    gravityCrop(...arguments)
+    fitGravityCrop(...arguments)
     return
   }
+
+  params.outputSize = guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: params.width && params.height ? 'ignoreAspect' : 'crop'
+  })
 
   const originalRatio = meta.width / meta.height
 
@@ -190,31 +216,38 @@ function fitCrop(tr, params, meta) {
       focalCoords
     )
 
-    tr.overlayWith(Buffer.from(crossHairs, 'utf8'), {top: 0, left: 0})
+    params.overlays = params.overlays || []
+    params.overlays.push(crossHairs)
   }
+
+  params.outputSize = Object.assign({}, guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: 'crop'
+  }), {
+    canvasWidth: crop.width,
+    canvasHeight: crop.height
+  })
 
   tr.extract(crop)
 }
 
-function clamp(inp, min, max) {
-  return Math.min(max, Math.max(min, Math.round(inp)))
-}
-
 function fitMin(tr, params, meta) {
-  params.outputSize = guessSizeFromParams(params, meta)
   params.skipResize = true
+  params.outputSize = guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: 'simple'
+  })
 
-  const targetWidth = Math.round(params.outputSize.width)
-  const targetHeight = Math.round(params.outputSize.height)
+  const {width, height} = params.outputSize
 
-  tr.withoutEnlargement().resize(targetWidth, targetHeight).crop()
+  tr.withoutEnlargement().resize(width, height).crop()
 
-  if (targetWidth < meta.width && targetHeight < meta.height) {
+  if (width < meta.width && height < meta.height) {
     return
   }
 
   const originalRatio = meta.width / meta.height
-  const targetRatio = targetWidth / targetHeight
+  const targetRatio = width / height
 
   let newWidth = Math.round(targetRatio * meta.height)
   let newHeight = meta.height
@@ -223,7 +256,52 @@ function fitMin(tr, params, meta) {
     newHeight = Math.round(meta.width / targetRatio)
   }
 
+  params.outputSize = Object.assign(params.outputSize, {
+    width: newWidth,
+    height: newHeight,
+    canvasWidth: newWidth,
+    canvasHeight: newHeight
+  })
+
   tr.resize(newWidth, newHeight).crop()
+}
+
+function fitGravityCrop(tr, params, meta) {
+  const cropType = typeof params.crop === 'string'
+    ? sharp.strategy[params.crop]
+    : params.crop
+
+  tr
+    .resize(params.width, params.height)
+    .crop(cropType || 'center')
+
+  params.outputSize = guessSizeFromParams(params, meta, {
+    round: true,
+    sizeMode: params.width && params.height ? 'ignoreAspect' : 'crop'
+  })
+}
+
+function getFocalCoords(params) {
+  const map = {
+    [sharp.gravity.west]: {x: 0, y: 0.5},
+    [sharp.gravity.east]: {x: 1, y: 0.5},
+    [sharp.gravity.north]: {x: 0.5, y: 0},
+    [sharp.gravity.south]: {x: 0.5, y: 1},
+    [sharp.gravity.northwest]: {x: 0, y: 0},
+    [sharp.gravity.northeast]: {x: 1, y: 0},
+    [sharp.gravity.southwest]: {x: 0, y: 1},
+    [sharp.gravity.southeast]: {x: 1, y: 1}
+  }
+
+  const coords = map[params.crop] || {x: 0.5, y: 0.5}
+  coords.x = isDefined(params.focalPointX) ? params.focalPointX : coords.x
+  coords.y = isDefined(params.focalPointY) ? params.focalPointY : coords.y
+
+  return coords
+}
+
+function clamp(inp, min, max) {
+  return Math.min(max, Math.max(min, Math.round(inp)))
 }
 
 function rotation(tr, params) {
@@ -266,6 +344,37 @@ function output(tr, params) {
   if (out.progressive) {
     tr.progressive()
   }
+}
+
+function border(tr, params, meta) {
+  if (!params.border) {
+    return
+  }
+
+  const {canvasWidth, canvasHeight} = params.outputSize
+  const borderImg = drawBorder(
+    {width: canvasWidth, height: canvasHeight},
+    params.border.size,
+    params.border.color
+  )
+
+  params.overlays = params.overlays || []
+  params.overlays.push(borderImg)
+}
+
+function overlays(tr, params, meta) {
+  const content = params.overlays
+  if (!content || content.length === 0) {
+    return
+  }
+
+  const {canvasWidth, canvasHeight} = params.outputSize
+  const container = drawContainer(
+    {width: canvasWidth, height: canvasHeight},
+    content
+  )
+
+  tr.overlayWith(Buffer.from(container, 'utf8'), {top: 0, left: 0})
 }
 
 function isDefined(thing) {

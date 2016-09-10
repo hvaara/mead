@@ -15,6 +15,7 @@ const queryMap = {
   'crop': ['crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
   'trim': ['trim', enumz(['auto', 'color'])],
   'trimtol': ['trimTolerance', intBetween(1, 50)],
+  'border': ['border', split, border],
   'fp-debug': ['focalPointTarget', presenceBool],
   'fp-x': ['focalPointX', numBetween(0, 1)],
   'fp-y': ['focalPointY', numBetween(0, 2)]
@@ -36,6 +37,18 @@ function validateTransforms(qs) {
     params[name] = value
     return params
   }, {})
+}
+
+function split(param, input) {
+  return input.split(',')
+}
+
+function border(param, input) {
+  const [size, clr] = input
+  return {
+    size: int('border[0]', size),
+    color: color('border[1]', clr)
+  }
 }
 
 function identity(param, input) {

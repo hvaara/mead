@@ -33,8 +33,8 @@ test('[transforms] translates `rot` param into numeric `rotation`', t => {
 })
 
 test('[transforms] throws if `rot` param is not 0, 90, 180 or 270', t => {
-  t.throws(() => validate({rot: '15.3'}), /must be one of/)
-  t.throws(() => validate({rot: '90.1'}), /must be one of/)
+  t.throws(() => validate({rot: '15'}), /must be one of/)
+  t.throws(() => validate({rot: '89'}), /must be one of/)
   t.end()
 })
 
@@ -85,11 +85,19 @@ test('[transforms] throws if `bg` param is not in known hex format', t => {
   t.end()
 })
 
-test('[transforms] throws if passing non-numbers to numeric params', t => {
-  t.throws(() => validate({w: 'foo'}), /valid number/)
-  t.throws(() => validate({h: 'foo'}), /valid number/)
-  t.throws(() => validate({q: 'foo'}), /valid number/)
-  t.throws(() => validate({rot: 'foo'}), /valid number/)
+test('[transforms] throws if passing non-integers to integer params', t => {
+  t.throws(() => validate({w: 'foo'}), /valid integer/)
+  t.throws(() => validate({h: 'foo'}), /valid integer/)
+  t.throws(() => validate({q: 'foo'}), /valid integer/)
+  t.throws(() => validate({rot: 'foo'}), /valid integer/)
+  t.end()
+})
+
+test('[transforms] throws if passing floats to integer params', t => {
+  t.throws(() => validate({w: '18.541'}), /valid integer/)
+  t.throws(() => validate({h: '155.1'}), /valid integer/)
+  t.throws(() => validate({q: '87.4'}), /valid integer/)
+  t.throws(() => validate({rot: '56.4'}), /valid integer/)
   t.end()
 })
 
