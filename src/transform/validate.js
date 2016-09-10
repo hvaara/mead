@@ -3,18 +3,18 @@ const Color = require('color')
 const sharp = require('sharp')
 
 const queryMap = {
-  'w': ['width', num],
-  'h': ['height', num],
-  'q': ['quality', numBetween(0, 100)],
+  'w': ['width', int],
+  'h': ['height', int],
+  'q': ['quality', intBetween(0, 100)],
   'bg': ['backgroundColor', color],
   'fm': ['output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
-  'rot': ['rotation', num, enumz([0, 90, 180, 270])],
+  'rot': ['rotation', int, enumz([0, 90, 180, 270])],
   'flip': ['flip', enumz(['h', 'v', 'hv'])],
   'dl': ['download', identity],
   'fit': ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])],
   'crop': ['crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
   'trim': ['trim', enumz(['auto', 'color'])],
-  'trimtol': ['trimTolerance', numBetween(1, 50)],
+  'trimtol': ['trimTolerance', intBetween(1, 50)],
   'fp-debug': ['focalPointTarget', presenceBool],
   'fp-x': ['focalPointX', numBetween(0, 1)],
   'fp-y': ['focalPointY', numBetween(0, 2)]
@@ -51,15 +51,32 @@ function num(param, value) {
   return val
 }
 
-function numBetween(min, max) {
+function int(param, value) {
+  const val = parseInt(value, 10)
+  if (isNaN(val) || val !== Number(value)) {
+    throw new Error(`Parameter "${param}" must be a valid integer`)
+  }
+
+  return val
+}
+
+function between(min, max, cast) {
   return (param, value) => {
-    const val = num(param, value)
+    const val = cast(param, value)
     if (val < min || val > max) {
       throw new Error(`Parameter "${param}" must be between ${min} and ${max}`)
     }
 
     return val
   }
+}
+
+function numBetween(min, max) {
+  return between(min, max, num)
+}
+
+function intBetween(min, max) {
+  return between(min, max, int)
 }
 
 function getOneOf(values) {
