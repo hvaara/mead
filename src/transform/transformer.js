@@ -8,6 +8,7 @@ const defaultBgColorAlpha = {r: 255, g: 255, b: 255, a: 0} // eslint-disable-lin
 const defaultBgColor = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
 
 const pipeline = [
+  sourceRect,
   quality,
   background,
   invert,
@@ -37,6 +38,22 @@ const fitHandlers = {
 function getTransformer(tr, params, meta) {
   pipeline.forEach(mod => mod(tr, params, meta))
   return tr
+}
+
+function sourceRect(tr, params, meta) {
+  const rect = params.sourceRectangle
+  if (!rect) {
+    return
+  }
+
+  const [left, top, width, height] = rect
+
+  if (left + width > meta.width || top + height > meta.height) {
+    // @todo throw?
+    return
+  }
+
+  tr.extract({left, top, width, height})
 }
 
 function quality(tr, params) {

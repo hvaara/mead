@@ -13,11 +13,11 @@
   - [x] Invert
   - [x] Blur
   - [x] Sharpen
+  - [x] Source region
   - [ ] DPR
-  - [ ] Monochrome
-  - [ ] Normalize
   - [ ] Watermark
   - [ ] Focal point zoom
+  - [ ] Auto format
 - [ ] Client hints
 - [ ] Metadata
   - [ ] Face detection

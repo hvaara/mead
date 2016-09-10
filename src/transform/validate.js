@@ -20,6 +20,7 @@ const queryMap = {
   'blur': ['blur', intBetween(1, 2000)],
   'pad': ['pad', int],
   'border': ['border', split, border],
+  'rect': ['sourceRectangle', split, ints(4)],
   'fp-debug': ['focalPointTarget', presenceBool],
   'fp-x': ['focalPointX', numBetween(0, 1)],
   'fp-y': ['focalPointY', numBetween(0, 2)]
@@ -94,6 +95,16 @@ function numBetween(min, max) {
 
 function intBetween(min, max) {
   return between(min, max, int)
+}
+
+function ints(expectedLength) {
+  return (param, input) => {
+    if (input.length !== expectedLength) {
+      throw new Error(`Parameter "${param}" takes ${expectedLength} integers in x,y,w,h format`)
+    }
+
+    return input.map((val, i) => int(`${param}[${i}]`, val))
+  }
 }
 
 function getOneOf(values) {
