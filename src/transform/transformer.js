@@ -210,8 +210,9 @@ function fitCrop(tr, params, meta) {
 
   const originalRatio = meta.width / meta.height
 
-  const targetWidth = params.outputSize.width
-  const targetHeight = params.outputSize.height
+  const {width, height} = getNewSize(params, meta)
+  const targetWidth = Math.min(params.maxWidth || +Infinity, width)
+  const targetHeight = Math.min(params.maxHeight || +Infinity, height)
 
   let resizeWidth = targetWidth
   let resizeHeight = targetHeight
@@ -309,8 +310,12 @@ function fitGravityCrop(tr, params, meta) {
     ? sharp.strategy[params.crop]
     : params.crop
 
+  const {width, height} = getNewSize(params, meta)
+  const targetWidth = Math.min(params.maxWidth || +Infinity, width)
+  const targetHeight = Math.min(params.maxHeight || +Infinity, height)
+
   tr
-    .resize(params.width, params.height)
+    .resize(targetWidth, targetHeight)
     .crop(cropType || 'center')
 
   params.outputSize = guessSizeFromParams(params, meta, {
@@ -437,10 +442,12 @@ function overlays(tr, params, meta) {
 function getNewSize(target, original) {
   const newSize = Object.assign({}, target)
 
-  if (target.width) {
-    newSize.height = (target.width * original.height) / original.width
+  if (target.width && target.height) {
+    return newSize
+  } else if (target.width) {
+    newSize.height = Math.round((target.width * original.height) / original.width)
   } else {
-    newSize.width = (target.height * original.width) / original.height
+    newSize.width = Math.round((target.height * original.width) / original.height)
   }
 
   return newSize

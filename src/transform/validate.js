@@ -21,6 +21,8 @@ const queryMap = {
   'pad': ['pad', int],
   'border': ['border', split, border],
   'rect': ['sourceRectangle', split, ints(4)],
+  'max-h': ['maxHeight', ifCrop(int)],
+  'max-w': ['maxWidth', ifCrop(int)],
   'fp-debug': ['focalPointTarget', presenceBool],
   'fp-x': ['focalPointX', numBetween(0, 1)],
   'fp-y': ['focalPointY', numBetween(0, 2)]
@@ -35,7 +37,7 @@ function validateTransforms(qs) {
 
     const [name, ...validators] = queryMap[param]
     const value = validators.reduce(
-      (result, validator) => validator(param, result),
+      (result, validator) => validator(param, result, qs),
       Array.isArray(qs[param]) ? qs[param][0] : qs[param]
     )
 
@@ -123,6 +125,13 @@ function enumz(values) {
 
 function presenceBool() {
   return true
+}
+
+function ifCrop(validator) {
+  return (param, value, qs) => {
+    // @todo pre-normalize to non-arrays so this works
+    return qs.fit === 'crop' ? validator(param, value) : undefined
+  }
 }
 
 function color(param, value) {
