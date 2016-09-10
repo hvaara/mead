@@ -30,7 +30,7 @@ function validateTransforms(qs) {
     const [name, ...validators] = queryMap[param]
     const value = validators.reduce(
       (result, validator) => validator(param, result),
-      qs[param]
+      Array.isArray(qs[param]) ? qs[param][0] : qs[param]
     )
 
     params[name] = value
