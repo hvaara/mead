@@ -10,7 +10,7 @@
   - [x] Crop
   - [x] Trim
   - [x] Extend (border)
-  - [ ] Invert
+  - [x] Invert
   - [ ] Blur
   - [ ] Sharpen
   - [ ] DPR
