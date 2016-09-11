@@ -35,8 +35,16 @@ const fitHandlers = {
   clip: fitClip
 }
 
+const defaultParams = {
+  maxWidth: +Infinity,
+  minWidth: -Infinity,
+  maxHeight: +Infinity,
+  minHeight: -Infinity
+}
+
 function getTransformer(tr, params, meta) {
-  pipeline.forEach(mod => mod(tr, params, meta))
+  const parameters = Object.assign({}, defaultParams, params)
+  pipeline.forEach(mod => mod(tr, parameters, meta))
   return tr
 }
 
@@ -198,45 +206,32 @@ function fitMax(tr, params, meta) {
 function fitCrop(tr, params, meta) {
   params.skipResize = true
 
-  if (typeof params.focalPointX === 'undefined' && typeof params.focalPointY === 'undefined') {
-    fitGravityCrop(...arguments)
-    return
-  }
+  const hasFocalPoint = isDefined(params.focalPointX) || isDefined(params.focalPointY)
+  const fitMethod = hasFocalPoint ? fitFocalCrop : fitGravityCrop
+  fitMethod(...arguments)
+}
 
+function fitFocalCrop(tr, params, meta) {
   params.outputSize = guessSizeFromParams(params, meta, {
     round: true,
     sizeMode: params.width && params.height ? 'ignoreAspect' : 'crop'
   })
 
-  const originalRatio = meta.width / meta.height
-
   const {width, height} = getNewSize(params, meta)
-  const targetWidth = Math.min(params.maxWidth || +Infinity, width)
-  const targetHeight = Math.min(params.maxHeight || +Infinity, height)
+  const targetWidth = clamp(width, params.minWidth, params.maxWidth)
+  const targetHeight = clamp(height, params.minHeight, params.maxHeight)
 
-  let resizeWidth = targetWidth
-  let resizeHeight = targetHeight
-
-  if ((resizeWidth / resizeHeight) < originalRatio) {
-    resizeWidth = resizeHeight * originalRatio
-  } else {
-    resizeHeight = resizeWidth / originalRatio
-  }
-
-  tr.resize(
-    Math.round(resizeWidth),
-    Math.round(resizeHeight)
-  )
+  tr.resize(Math.round(targetWidth), Math.round(targetHeight))
 
   const focal = getFocalCoords(params)
   const center = {
-    x: (resizeWidth * focal.x) - (targetWidth / 2),
-    y: (resizeHeight * focal.y) - (targetHeight / 2)
+    x: (targetWidth * focal.x) - (targetWidth / 2),
+    y: (targetHeight * focal.y) - (targetHeight / 2)
   }
 
   const pos = {
-    left: clamp(center.x, 0, resizeWidth - targetWidth),
-    top: clamp(center.y, 0, resizeHeight - targetHeight)
+    left: clamp(center.x, 0, targetWidth - targetWidth),
+    top: clamp(center.y, 0, targetHeight - targetHeight)
   }
 
   const crop = {
@@ -248,8 +243,8 @@ function fitCrop(tr, params, meta) {
 
   if (params.focalPointTarget) {
     const focalCoords = {
-      x: (resizeWidth * focal.x) - pos.left,
-      y: (resizeHeight * focal.y) - pos.top
+      x: (targetWidth * focal.x) - pos.left,
+      y: (targetHeight * focal.y) - pos.top
     }
 
     const crossHairs = drawCrosshairs(
@@ -311,8 +306,8 @@ function fitGravityCrop(tr, params, meta) {
     : params.crop
 
   const {width, height} = getNewSize(params, meta)
-  const targetWidth = Math.min(params.maxWidth || +Infinity, width)
-  const targetHeight = Math.min(params.maxHeight || +Infinity, height)
+  const targetWidth = clamp(width, params.minWidth, params.maxWidth)
+  const targetHeight = clamp(height, params.minHeight, params.maxHeight)
 
   tr
     .resize(targetWidth, targetHeight)

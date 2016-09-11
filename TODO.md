@@ -15,7 +15,7 @@
   - [x] Sharpen
   - [x] Source region
   - [x] Max height/width
-  - [ ] Minimum height/width
+  - [x] Minimum height/width
   - [ ] DPR
   - [ ] Watermark
   - [ ] Focal point zoom

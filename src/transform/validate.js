@@ -23,6 +23,8 @@ const queryMap = {
   'rect': ['sourceRectangle', split, ints(4)],
   'max-h': ['maxHeight', ifCrop(int)],
   'max-w': ['maxWidth', ifCrop(int)],
+  'min-h': ['minHeight', ifCrop(int)],
+  'min-w': ['minWidth', ifCrop(int)],
   'fp-debug': ['focalPointTarget', presenceBool],
   'fp-x': ['focalPointX', numBetween(0, 1)],
   'fp-y': ['focalPointY', numBetween(0, 2)]
