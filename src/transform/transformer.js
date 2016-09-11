@@ -9,6 +9,7 @@ const defaultBgColor = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
 
 const pipeline = [
   sourceRect,
+  applyDpr,
   quality,
   background,
   invert,
@@ -35,16 +36,8 @@ const fitHandlers = {
   clip: fitClip
 }
 
-const defaultParams = {
-  maxWidth: +Infinity,
-  minWidth: -Infinity,
-  maxHeight: +Infinity,
-  minHeight: -Infinity
-}
-
 function getTransformer(tr, params, meta) {
-  const parameters = Object.assign({}, defaultParams, params)
-  pipeline.forEach(mod => mod(tr, parameters, meta))
+  pipeline.forEach(mod => mod(tr, params, meta))
   return tr
 }
 
@@ -62,6 +55,20 @@ function sourceRect(tr, params, meta) {
   }
 
   tr.extract({left, top, width, height})
+}
+
+function applyDpr(tr, params) {
+  if (params.dpr === 1) {
+    return
+  }
+
+  if (params.width) {
+    params.width *= params.dpr
+  }
+
+  if (params.height) {
+    params.height *= params.dpr
+  }
 }
 
 function quality(tr, params) {
@@ -100,7 +107,10 @@ function trim(tr, params) {
 
 function resize(tr, params) {
   if (!params.skipResize && (params.width || params.height)) {
-    tr.resize(params.width, params.height)
+    tr.resize(
+      params.width && Math.round(params.width),
+      params.height && Math.round(params.height)
+    )
   }
 }
 
@@ -212,26 +222,28 @@ function fitCrop(tr, params, meta) {
 }
 
 function fitFocalCrop(tr, params, meta) {
-  params.outputSize = guessSizeFromParams(params, meta, {
+  const {width, height} = guessSizeFromParams(params, meta, {
     round: true,
-    sizeMode: params.width && params.height ? 'ignoreAspect' : 'crop'
+    sizeMode: 'crop'
   })
 
-  const {width, height} = getNewSize(params, meta)
-  const targetWidth = clamp(width, params.minWidth, params.maxWidth)
-  const targetHeight = clamp(height, params.minHeight, params.maxHeight)
+  const aspectWidth = clamp(width, params.minWidth, params.maxWidth)
+  const aspectHeight = clamp(height, params.minHeight, params.maxHeight)
 
-  tr.resize(Math.round(targetWidth), Math.round(targetHeight))
+  tr.resize(Math.round(aspectWidth), Math.round(aspectHeight))
 
   const focal = getFocalCoords(params)
   const center = {
-    x: (targetWidth * focal.x) - (targetWidth / 2),
-    y: (targetHeight * focal.y) - (targetHeight / 2)
+    x: (aspectWidth * focal.x) - (aspectWidth / 2),
+    y: (aspectHeight * focal.y) - (aspectHeight / 2)
   }
 
+  const targetWidth = params.width || aspectWidth
+  const targetHeight = params.height || aspectHeight
+
   const pos = {
-    left: clamp(center.x, 0, targetWidth - targetWidth),
-    top: clamp(center.y, 0, targetHeight - targetHeight)
+    left: clamp(center.x, 0, aspectWidth - targetWidth),
+    top: clamp(center.y, 0, aspectHeight - targetHeight)
   }
 
   const crop = {
@@ -243,13 +255,14 @@ function fitFocalCrop(tr, params, meta) {
 
   if (params.focalPointTarget) {
     const focalCoords = {
-      x: (targetWidth * focal.x) - pos.left,
-      y: (targetHeight * focal.y) - pos.top
+      x: (aspectWidth * focal.x) - pos.left,
+      y: (aspectHeight * focal.y) - pos.top
     }
 
     const crossHairs = drawCrosshairs(
-      {width: targetWidth, height: targetHeight},
-      focalCoords
+      {width: aspectWidth, height: aspectHeight},
+      focalCoords,
+      params.dpr
     )
 
     params.overlays = params.overlays || []
@@ -394,7 +407,7 @@ function border(tr, params, meta) {
 
   const borderImg = drawBorder(
     params.outputSize,
-    params.border.size,
+    params.border.size * params.dpr,
     params.border.color
   )
 
@@ -408,10 +421,9 @@ function pad(tr, params, meta) {
   }
 
   if (params.width || params.height) {
-    const size = params.pad * 2
+    const size = params.pad * 2 * params.dpr
     const width = params.width ? params.width - size : undefined
     const height = params.height ? params.height - size : undefined
-
     tr.resize(width, height)
 
     const newSize = getNewSize({width, height}, meta)
@@ -421,7 +433,7 @@ function pad(tr, params, meta) {
     }
   }
 
-  tr.extend(params.pad)
+  tr.extend(params.pad * params.dpr)
 }
 
 function overlays(tr, params, meta) {

@@ -1,6 +1,8 @@
 /* eslint-disable id-length */
 const Color = require('color')
 const sharp = require('sharp')
+const defaults = require('lodash/defaults')
+const isUndefined = require('lodash/isUndefined')
 
 const queryMap = [
   //  Input operations
@@ -9,7 +11,8 @@ const queryMap = [
   // Important to know if we are dealing with transparency or not
   ['fm', 'output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
 
-  // Limits sizes
+  // Affects sizes throughout
+  ['dpr', 'dpr', numBetween(0, 5), toFixed(2)],
   ['max-h', 'maxHeight', ifCrop(int)],
   ['max-w', 'maxWidth', ifCrop(int)],
   ['min-h', 'minHeight', ifCrop(int)],
@@ -48,24 +51,38 @@ const queryMap = [
 ]
 
 const defaultParameters = {
-  dpr: 1
+  dpr: 1,
+
+  maxWidth: +Infinity,
+  minWidth: -Infinity,
+  maxHeight: +Infinity,
+  minHeight: -Infinity
 }
 
-function mapQueryParameters(qs) {
-  return queryMap.reduce((params, param) => {
+function mapQueryParameters(queryString) {
+  const qs = queryMap.reduce((params, param) => {
+    const [qParam] = param
+    const val = queryString[qParam]
+    if (!isUndefined(val) && isUndefined(params[qParam])) {
+      params[qParam] = Array.isArray(val) ? val[0] : val
+    }
+    return params
+  }, {})
+
+  return defaults(queryMap.reduce((params, param) => {
     const [qParam, name, ...validators] = param
-    if (typeof qs[qParam] === 'undefined') {
+    if (isUndefined(qs[qParam])) {
       return params
     }
 
     const value = validators.reduce(
-      (result, validator) => validator(qParam, result, params),
-      Array.isArray(qs[qParam]) ? qs[qParam][0] : qs[qParam]
+      (result, validator) => validator(qParam, result, params, qs),
+      qs[qParam]
     )
 
     params[name] = value
     return params
-  }, Object.assign({}, defaultParameters))
+  }, {}), defaultParameters)
 }
 
 function split(param, input) {
@@ -82,6 +99,12 @@ function border(param, input) {
 
 function identity(param, input) {
   return input
+}
+
+function toFixed(prec) {
+  return (param, value) => {
+    return Number(value.toFixed(prec))
+  }
 }
 
 function num(param, value) {
@@ -150,7 +173,7 @@ function presenceBool() {
 }
 
 function ifCrop(validator) {
-  return (param, value, qs) => {
+  return (param, value, params, qs) => {
     // @todo pre-normalize to non-arrays so this works
     return qs.fit === 'crop' ? validator(param, value) : undefined
   }

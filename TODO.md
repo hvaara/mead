@@ -16,7 +16,7 @@
   - [x] Source region
   - [x] Max height/width
   - [x] Minimum height/width
-  - [ ] DPR
+  - [x] DPR
   - [ ] Watermark
   - [ ] Focal point zoom
   - [ ] Auto format

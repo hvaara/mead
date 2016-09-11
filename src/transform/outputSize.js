@@ -1,3 +1,29 @@
+module.exports = function getOutputSize(params, meta, opts = {}) {
+  let out = getInitialOutputParams(params, meta)
+
+  if (opts.sizeMode === 'simple') {
+    out = getOutputParamsInSimpleMode(out, params, meta)
+  } else if (params.width && params.height) {
+    out = getOutputParamsFromExactSize(out, params, meta, opts.sizeMode)
+  } else if (params.width) {
+    out = getOutputParamsFromWidth(out, params, meta, opts.sizeMode)
+  } else if (params.height) {
+    out = getOutputParamsFromHeight(out, params, meta, opts.sizeMode)
+  } else {
+    out.width = meta.width
+    out.height = meta.height
+  }
+
+  if (opts.withoutEnlargement && (meta.width < out.width || meta.height < out.height)) {
+    out.xFactor = 1
+    out.yFactor = 1
+    out.width = meta.width
+    out.height = meta.height
+  }
+
+  return out
+}
+
 function getInitialOutputParams(params, meta) {
   return {
     width: params.width,
@@ -86,30 +112,4 @@ function getOutputParamsInSimpleMode(out, params, meta) {
   }
 
   return Object.assign(out, {width: height * (meta.width / meta.height), height})
-}
-
-module.exports = function getOutputSize(params, meta, opts = {}) {
-  let out = getInitialOutputParams(params, meta)
-
-  if (opts.sizeMode === 'simple') {
-    out = getOutputParamsInSimpleMode(out, params, meta)
-  } else if (params.width && params.height) {
-    out = getOutputParamsFromExactSize(out, params, meta, opts.sizeMode)
-  } else if (params.width) {
-    out = getOutputParamsFromWidth(out, params, meta, opts.sizeMode)
-  } else if (params.height) {
-    out = getOutputParamsFromHeight(out, params, meta, opts.sizeMode)
-  } else {
-    out.width = meta.width
-    out.height = meta.height
-  }
-
-  if (opts.withoutEnlargement && (meta.width < out.width || meta.height < out.height)) {
-    out.xFactor = 1
-    out.yFactor = 1
-    out.width = meta.width
-    out.height = meta.height
-  }
-
-  return out
 }

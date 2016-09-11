@@ -1,4 +1,4 @@
-module.exports = (size, focal) => {
+module.exports = (size, focal, dpr = 1) => {
   const {width, height} = size
   const {x, y} = focal
 
@@ -6,6 +6,7 @@ module.exports = (size, focal) => {
     <path
       fill="none"
       stroke="red"
+      stroke-width="${1 * dpr}"
       d="M0 ${y}h${width}M${x} 0v${height}"
     />
   `
