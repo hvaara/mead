@@ -2,50 +2,70 @@
 const Color = require('color')
 const sharp = require('sharp')
 
-const queryMap = {
-  'w': ['width', int],
-  'h': ['height', int],
-  'q': ['quality', intBetween(0, 100)],
-  'bg': ['backgroundColor', color],
-  'fm': ['output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
-  'rot': ['rotation', int, enumz([0, 90, 180, 270])],
-  'flip': ['flip', enumz(['h', 'v', 'hv'])],
-  'dl': ['download', identity],
-  'fit': ['fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])],
-  'crop': ['crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
-  'trim': ['trim', enumz(['auto', 'color'])],
-  'trimtol': ['trimTolerance', intBetween(1, 50)],
-  'invert': ['invert', presenceBool],
-  'sharp': ['sharpen', intBetween(1, 100)],
-  'blur': ['blur', intBetween(1, 2000)],
-  'pad': ['pad', int],
-  'border': ['border', split, border],
-  'rect': ['sourceRectangle', split, ints(4)],
-  'max-h': ['maxHeight', ifCrop(int)],
-  'max-w': ['maxWidth', ifCrop(int)],
-  'min-h': ['minHeight', ifCrop(int)],
-  'min-w': ['minWidth', ifCrop(int)],
-  'fp-debug': ['focalPointTarget', presenceBool],
-  'fp-x': ['focalPointX', numBetween(0, 1)],
-  'fp-y': ['focalPointY', numBetween(0, 2)]
+const queryMap = [
+  //  Input operations
+  ['rect', 'sourceRectangle', split, ints(4)],
+
+  // Important to know if we are dealing with transparency or not
+  ['fm', 'output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
+
+  // Limits sizes
+  ['max-h', 'maxHeight', ifCrop(int)],
+  ['max-w', 'maxWidth', ifCrop(int)],
+  ['min-h', 'minHeight', ifCrop(int)],
+  ['min-w', 'minWidth', ifCrop(int)],
+
+  // Basic operations
+  ['w', 'width', int],
+  ['h', 'height', int],
+  ['q', 'quality', intBetween(0, 100)],
+  ['bg', 'backgroundColor', color],
+
+  // Affects crop regions
+  ['fp-x', 'focalPointX', numBetween(0, 1)],
+  ['fp-y', 'focalPointY', numBetween(0, 2)],
+
+  // Effects
+  ['invert', 'invert', presenceBool],
+  ['sharp', 'sharpen', intBetween(1, 100)],
+  ['blur', 'blur', intBetween(1, 2000)],
+
+  // Changes dimensions
+  ['rot', 'rotation', int, enumz([0, 90, 180, 270])],
+  ['flip', 'flip', enumz(['h', 'v', 'hv'])],
+  ['fit', 'fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])],
+  ['crop', 'crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
+  ['trim', 'trim', enumz(['auto', 'color'])],
+  ['trimtol', 'trimTolerance', intBetween(1, 50)],
+  ['pad', 'pad', int],
+
+  // Overlays
+  ['border', 'border', split, border],
+  ['fp-debug', 'focalPointTarget', presenceBool],
+
+  // Meta/header stuff
+  ['dl', 'download', identity],
+]
+
+const defaultParameters = {
+  dpr: 1
 }
 
-function validateTransforms(qs) {
-  return Object.keys(qs).reduce((params, param) => {
-    // Skip unrecognized parameters
-    if (!queryMap[param]) {
+function mapQueryParameters(qs) {
+  return queryMap.reduce((params, param) => {
+    const [qParam, name, ...validators] = param
+    if (typeof qs[qParam] === 'undefined') {
       return params
     }
 
-    const [name, ...validators] = queryMap[param]
     const value = validators.reduce(
-      (result, validator) => validator(param, result, qs),
-      Array.isArray(qs[param]) ? qs[param][0] : qs[param]
+      (result, validator) => validator(qParam, result, params),
+      Array.isArray(qs[qParam]) ? qs[qParam][0] : qs[qParam]
     )
 
     params[name] = value
     return params
-  }, {})
+  }, Object.assign({}, defaultParameters))
 }
 
 function split(param, input) {
@@ -223,4 +243,4 @@ function crop(values) {
   }
 }
 
-module.exports = validateTransforms
+module.exports = mapQueryParameters

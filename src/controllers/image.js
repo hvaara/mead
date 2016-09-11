@@ -1,7 +1,7 @@
 const Boom = require('boom')
 const sharp = require('sharp')
 const transformer = require('../transform/transformer')
-const validateTransforms = require('../transform/validate')
+const mapQueryParameters = require('../transform/mapQueryParameters')
 const errorTransformer = require('../transform/errorTransformer')
 
 const mimeTypes = {
@@ -18,7 +18,7 @@ module.exports = (request, response, next) => {
 
   let params
   try {
-    params = validateTransforms(request.query)
+    params = mapQueryParameters(request.query)
   } catch (err) {
     next(Boom.badRequest(err))
     return
