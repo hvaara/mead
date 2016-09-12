@@ -115,10 +115,17 @@ function trim(tr, params) {
   return tr.trim(params.trimTolerance || undefined)
 }
 
-function resize(tr, params) {
-  if (!params.fit && (params.width || params.height)) {
-    tr.resize(params.width, params.height)
+function resize(tr, params, meta, opts) {
+  if (params.fit || (!params.width && !params.height)) {
+    return
   }
+
+  const isLandscape = meta.width > meta.height
+  const size = params.width > opts.maxSize || params.height > opts.maxSize
+    ? getNewSizeForAspectRatio({[isLandscape ? 'width' : 'height']: opts.maxSize}, meta)
+    : params
+
+  tr.resize(size.width, size.height)
 }
 
 function fit(tr, params, meta) {
