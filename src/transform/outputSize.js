@@ -78,7 +78,7 @@ function getOutputParamsFromExactSize(out, params, meta, sizeMode) {
 function getOutputParamsFromWidth(out, params, meta, sizeMode) {
   out.xFactor = meta.width / params.width
 
-  if (sizeMode === 'ignoreAspect') {
+  if (sizeMode === 'ignoreAspectRatio') {
     out.height = meta.height
   } else {
     out.yFactor = out.xFactor
@@ -91,7 +91,7 @@ function getOutputParamsFromWidth(out, params, meta, sizeMode) {
 function getOutputParamsFromHeight(out, params, meta, sizeMode) {
   out.yFactor = meta.height / params.height
 
-  if (sizeMode === 'ignoreAspect') {
+  if (sizeMode === 'ignoreAspectRatio') {
     out.width = meta.width
   } else {
     out.xFactor = out.yFactor

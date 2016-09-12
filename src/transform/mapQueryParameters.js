@@ -3,9 +3,10 @@ const Color = require('color')
 const sharp = require('sharp')
 const defaults = require('lodash/defaults')
 const isUndefined = require('lodash/isUndefined')
+const ValidationError = require('../errors/validationError')
 
 const queryMap = [
-  //  Input operations
+  // Input operations
   ['rect', 'sourceRectangle', split, ints(4)],
 
   // Important to know if we are dealing with transparency or not
@@ -110,7 +111,7 @@ function toFixed(prec) {
 function num(param, value) {
   const val = Number(value)
   if (isNaN(val)) {
-    throw new Error(`Parameter "${param}" must be a valid number`)
+    throw new ValidationError(`Parameter "${param}" must be a valid number`)
   }
 
   return val
@@ -119,7 +120,7 @@ function num(param, value) {
 function int(param, value) {
   const val = parseInt(value, 10)
   if (isNaN(val) || val !== Number(value)) {
-    throw new Error(`Parameter "${param}" must be a valid integer`)
+    throw new ValidationError(`Parameter "${param}" must be a valid integer`)
   }
 
   return val
@@ -129,7 +130,7 @@ function between(min, max, cast) {
   return (param, value) => {
     const val = cast(param, value)
     if (val < min || val > max) {
-      throw new Error(`Parameter "${param}" must be between ${min} and ${max}`)
+      throw new ValidationError(`Parameter "${param}" must be between ${min} and ${max}`)
     }
 
     return val
@@ -147,7 +148,7 @@ function intBetween(min, max) {
 function ints(expectedLength) {
   return (param, input) => {
     if (input.length !== expectedLength) {
-      throw new Error(`Parameter "${param}" takes ${expectedLength} integers in x,y,w,h format`)
+      throw new ValidationError(`Parameter "${param}" takes ${expectedLength} integers in x,y,w,h format`)
     }
 
     return input.map((val, i) => int(`${param}[${i}]`, val))
@@ -161,7 +162,7 @@ function getOneOf(values) {
 function enumz(values) {
   return (param, value) => {
     if (!values.includes(value)) {
-      throw new Error(`Parameter "${param}" - ${getOneOf(values)}`)
+      throw new ValidationError(`Parameter "${param}" - ${getOneOf(values)}`)
     }
 
     return value
@@ -182,13 +183,13 @@ function ifCrop(validator) {
 function color(param, value) {
   const val = value.toLowerCase()
   if (!/^[a-f0-9]+$/.test(val)) {
-    throw new Error(`Parameter "${param}" must be a valid hexadecimal color`)
+    throw new ValidationError(`Parameter "${param}" must be a valid hexadecimal color`)
   }
 
   const formats = ['rgb', 'argb', 'rrggbb', 'aarrggbb']
   const allowed = [3, 4, 6, 8]
   if (!allowed.includes(val.length)) {
-    throw new Error(
+    throw new ValidationError(
       `Parameter "${param}" must be a valid hexadecimal color.\n`
       + `Allowed formats: ${formats.join(', ')}`
     )
@@ -251,7 +252,7 @@ function crop(values) {
 
   function mapPositional(val) {
     if (!values.includes(val)) {
-      throw new Error(`Value "${val}" not recognized for parameter "crop", ${getOneOf(values)}`)
+      throw new ValidationError(`Value "${val}" not recognized for parameter "crop", ${getOneOf(values)}`)
     }
 
     return cropPositionMap[val] || false

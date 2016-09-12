@@ -1,8 +1,10 @@
 const sharp = require('sharp')
+const round = require('./round')
 const drawCrosshairs = require('../draw/drawCrosshairs')
 const drawBorder = require('../draw/drawBorder')
 const drawContainer = require('../draw/drawContainer')
 const getOutputSize = require('./outputSize')
+const constrainSize = require('./constrainSize')
 
 const defaultBgColorAlpha = {r: 255, g: 255, b: 255, a: 0} // eslint-disable-line id-length
 const defaultBgColor = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
@@ -23,6 +25,7 @@ const pipeline = [
   pad,
   border,
   overlays,
+  constrainOriginal,
   output
 ]
 
@@ -36,8 +39,15 @@ const fitHandlers = {
   clip: fitClip
 }
 
-function getTransformer(tr, params, meta) {
-  pipeline.forEach(mod => mod(tr, params, meta))
+function getTransformer(tr, params, meta, opts) {
+  const options = {
+    maxSize: opts.maxSize,
+    constrain: targetSize => constrainSize(opts.maxSize, meta, targetSize),
+    getOutputSize: sizeOpts => getOutputSize(params, meta, sizeOpts),
+    paramsSize: size => sizeFromParams(params, size)
+  }
+
+  pipeline.forEach(mod => mod(tr, params, meta, options))
   return tr
 }
 
@@ -106,77 +116,83 @@ function trim(tr, params) {
 }
 
 function resize(tr, params) {
-  if (!params.skipResize && (params.width || params.height)) {
-    tr.resize(
-      params.width && Math.round(params.width),
-      params.height && Math.round(params.height)
-    )
+  if (!params.fit && (params.width || params.height)) {
+    tr.resize(params.width, params.height)
   }
 }
 
-function guessSizeFromParams(params, meta, opts = {}) {
-  const filter = opts.round ? size => ({
-    width: Math.round(size.width),
-    height: Math.round(size.height)
-  }) : inp => inp
-
-  return filter(getOutputSize(params, meta, opts))
-}
-
 function fit(tr, params, meta) {
+  if (!params.fit) {
+    params.outputSize = {width: meta.width, height: meta.height}
+    return
+  }
+
   const handler = fitHandlers[params.fit] || fitClip
   handler(...arguments)
 }
 
-function fitFill(tr, params, meta) {
-  tr.embed()
-  params.outputSize = guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: 'embed'
-  })
+function fitClip(tr, params, meta, opts) {
+  const {width, height} = params.outputSize = opts.constrain(
+    opts.getOutputSize({sizeMode: 'max'})
+  )
+
+  const isLandscape = width > height
+  tr.max().resize(
+    isLandscape ? width : undefined,
+    isLandscape ? undefined : height
+  )
 }
 
-function fitClip(tr, params, meta) {
-  tr.max()
-  params.outputSize = guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: 'max'
-  })
-}
-
-function fitScale(tr, params, meta) {
+function fitScale(tr, params, meta, opts) {
   const hasExactSize = params.width && params.height
+  const sizeMode = hasExactSize ? 'ignoreAspectRatio' : 'max'
 
-  if (hasExactSize) {
-    tr.ignoreAspectRatio()
-  } else {
-    tr.max()
+  const {width, height} = params.outputSize = opts.constrain(
+    opts.getOutputSize({sizeMode})
+  )
+
+  const isLandscape = width > height
+  let sizeWidth = width
+  let sizeHeight = height
+  if (!hasExactSize) {
+    sizeWidth = isLandscape ? width : undefined
+    sizeHeight = isLandscape ? undefined : height
   }
 
-  params.outputSize = guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: hasExactSize ? 'ignoreAspect' : 'max'
-  })
+  tr[sizeMode]().resize(sizeWidth, sizeHeight)
 }
 
-function fitFillMax(tr, params, meta) {
-  tr.withoutEnlargement().max()
+function fitFill(tr, params, meta, opts) {
+  const size = params.outputSize = opts.constrain(
+    opts.getOutputSize({sizeMode: 'embed'})
+  )
 
-  params.outputSize = guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: 'max',
-    withoutEnlargement: true
-  })
+  tr.embed().resize(size.width, size.height)
+}
 
-  if ((!params.height && params.width < meta.width)
-    || (!params.width && params.height < meta.height)) {
+function fitFillMax(tr, params, meta, opts) {
+  const {width, height} = params.outputSize = opts.constrain(
+    opts.getOutputSize({
+      sizeMode: 'max',
+      withoutEnlargement: true
+    })
+  )
+
+  const isLandscape = width > height
+  tr.withoutEnlargement().max().resize(
+    isLandscape ? width : undefined,
+    isLandscape ? undefined : height
+  )
+
+  if ((!params.height && width < meta.width)
+    || (!params.width && height < meta.height)) {
     return
   }
 
   const aspect = meta.width / meta.height
 
-  const targetWidth = params.width || Math.round(params.height * aspect)
-  const targetHeight = params.height || Math.round(params.width / aspect)
+  const targetWidth = Math.min(params.width || Math.round(params.height * aspect), opts.maxSize)
+  const targetHeight = Math.min(params.height || Math.round(params.width / aspect), opts.maxSize)
 
   let resizeWidth = Math.min(targetWidth, meta.width)
   let resizeHeight = Math.min(targetHeight, meta.height)
@@ -203,43 +219,43 @@ function fitFillMax(tr, params, meta) {
   tr.extend(extendBy)
 }
 
-function fitMax(tr, params, meta) {
-  tr.withoutEnlargement().max()
+function fitMax(tr, params, meta, opts) {
+  const {width, height} = params.outputSize = opts.constrain(
+    opts.getOutputSize({
+      sizeMode: 'max',
+      withoutEnlargement: true
+    })
+  )
 
-  params.outputSize = guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: 'max',
-    withoutEnlargement: true
-  })
+  const isLandscape = width > height
+  tr.withoutEnlargement().max().resize(
+    isLandscape ? width : undefined,
+    isLandscape ? undefined : height
+  )
 }
 
 function fitCrop(tr, params, meta) {
-  params.skipResize = true
-
   const hasFocalPoint = isDefined(params.focalPointX) || isDefined(params.focalPointY)
   const fitMethod = hasFocalPoint ? fitFocalCrop : fitGravityCrop
   fitMethod(...arguments)
 }
 
-function fitFocalCrop(tr, params, meta) {
-  const {width, height} = guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: 'crop'
-  })
+function fitFocalCrop(tr, params, meta, opts) {
+  const {width, height} = opts.getOutputSize({sizeMode: 'crop'})
 
   const aspectWidth = clamp(width, params.minWidth, params.maxWidth)
   const aspectHeight = clamp(height, params.minHeight, params.maxHeight)
 
   tr.resize(Math.round(aspectWidth), Math.round(aspectHeight))
 
-  const focal = getFocalCoords(params)
-  const center = {
-    x: (aspectWidth * focal.x) - (aspectWidth / 2),
-    y: (aspectHeight * focal.y) - (aspectHeight / 2)
-  }
-
   const targetWidth = params.width || aspectWidth
   const targetHeight = params.height || aspectHeight
+
+  const focal = getFocalCoords(params)
+  const center = {
+    x: (aspectWidth * focal.x) - (targetWidth / 2),
+    y: (aspectHeight * focal.y) - (targetHeight / 2)
+  }
 
   const pos = {
     left: clamp(center.x, 0, aspectWidth - targetWidth),
@@ -269,25 +285,18 @@ function fitFocalCrop(tr, params, meta) {
     params.overlays.push(crossHairs)
   }
 
-  params.outputSize = Object.assign({}, guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: 'crop'
-  }), {
+  tr.extract(crop)
+
+  params.outputSize = Object.assign({}, opts.constrain(opts.getOutputSize({sizeMode: 'crop'})), {
     width: crop.width,
     height: crop.height
   })
-
-  tr.extract(crop)
 }
 
-function fitMin(tr, params, meta) {
-  params.skipResize = true
-  params.outputSize = guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: 'simple'
-  })
-
-  const {width, height} = params.outputSize
+function fitMin(tr, params, meta, opts) {
+  const {width, height} = params.outputSize = opts.constrain(
+    opts.getOutputSize({sizeMode: 'simple'})
+  )
 
   tr.withoutEnlargement().resize(width, height).crop()
 
@@ -313,23 +322,22 @@ function fitMin(tr, params, meta) {
   tr.resize(newWidth, newHeight).crop()
 }
 
-function fitGravityCrop(tr, params, meta) {
+function fitGravityCrop(tr, params, meta, opts) {
   const cropType = typeof params.crop === 'string'
     ? sharp.strategy[params.crop]
     : params.crop
 
-  const {width, height} = getNewSize(params, meta)
-  const targetWidth = clamp(width, params.minWidth, params.maxWidth)
-  const targetHeight = clamp(height, params.minHeight, params.maxHeight)
+  const {width, height} = getNewSizeForAspectRatio(params, meta)
+  const targetWidth = clamp(width, params.minWidth, Math.min(opts.maxSize, params.maxWidth))
+  const targetHeight = clamp(height, params.minHeight, Math.min(opts.maxSize, params.maxHeight))
 
   tr
     .resize(targetWidth, targetHeight)
     .crop(cropType || 'center')
 
-  params.outputSize = guessSizeFromParams(params, meta, {
-    round: true,
-    sizeMode: params.width && params.height ? 'ignoreAspect' : 'crop'
-  })
+  params.outputSize = round(getOutputSize(params, meta, {
+    sizeMode: params.width && params.height ? 'ignoreAspectRatio' : 'crop'
+  }))
 }
 
 function getFocalCoords(params) {
@@ -357,10 +365,10 @@ function clamp(inp, min, max) {
 
 function rotation(tr, params) {
   // Auto-rotate by EXIF if no rotation is explicitly set
-  if (typeof params.rotation === 'undefined') {
-    tr.rotate()
-  } else {
+  if (isDefined(params.rotation)) {
     tr.rotate(params.rotation)
+  } else {
+    tr.rotate()
   }
 }
 
@@ -426,7 +434,7 @@ function pad(tr, params, meta) {
     const height = params.height ? params.height - size : undefined
     tr.resize(width, height)
 
-    const newSize = getNewSize({width, height}, meta)
+    const newSize = getNewSizeForAspectRatio({width, height}, meta)
     params.outputSize = {
       width: newSize.width + size,
       height: newSize.height + size
@@ -446,7 +454,7 @@ function overlays(tr, params, meta) {
   tr.overlayWith(Buffer.from(container, 'utf8'), {})
 }
 
-function getNewSize(target, original) {
+function getNewSizeForAspectRatio(target, original) {
   const newSize = Object.assign({}, target)
 
   if (target.width && target.height) {
@@ -460,8 +468,38 @@ function getNewSize(target, original) {
   return newSize
 }
 
+function constrainOriginal(tr, params, meta, opts) {
+  if (params.width || params.height) {
+    // Expect us to already be constrained
+    return
+  }
+
+  const out = params.outputSize
+  const max = opts.maxSize
+
+  // Do we need to be constrained?
+  if (!out || (out.width < max && out.height < max)) {
+    return
+  }
+
+  // Resize by aspect ratio
+  const isLandscape = out.width > out.height
+  if (isLandscape && out.width > max) {
+    tr.resize(max)
+  } else if (out.height > max) {
+    tr.resize(undefined, max)
+  }
+}
+
 function isDefined(thing) {
   return typeof thing !== 'undefined'
+}
+
+function sizeFromParams(params, size) {
+  return [
+    isDefined(params.width) ? size.width : undefined,
+    isDefined(params.height) ? size.height : undefined
+  ]
 }
 
 module.exports = getTransformer

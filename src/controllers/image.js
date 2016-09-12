@@ -3,6 +3,7 @@ const sharp = require('sharp')
 const transformer = require('../transform/transformer')
 const mapQueryParameters = require('../transform/mapQueryParameters')
 const errorTransformer = require('../transform/errorTransformer')
+const ValidationError = require('../errors/validationError')
 
 const mimeTypes = {
   jpeg: 'image/jpeg',
@@ -16,11 +17,15 @@ module.exports = (request, response, next) => {
   const {sourceAdapter} = response.locals
   const urlPath = request.params['0']
 
+  const transformationOpts = {
+    maxSize: request.app.locals.config.images.maxSize
+  }
+
   let params
   try {
-    params = mapQueryParameters(request.query)
+    params = mapQueryParameters(request.query, transformationOpts)
   } catch (err) {
-    next(Boom.badRequest(err))
+    next(err instanceof ValidationError ? Boom.badRequest(err) : err)
     return
   }
 
@@ -42,7 +47,7 @@ module.exports = (request, response, next) => {
         return
       }
 
-      const transformStream = transformer(imageStream, params, meta)
+      const transformStream = transformer(imageStream, params, meta, transformationOpts)
       transformStream
         .on('info', info => sendHeaders(info, params, response))
         .pipe(response)

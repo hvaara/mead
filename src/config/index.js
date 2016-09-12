@@ -1,6 +1,7 @@
 /* eslint-disable no-process-env */
 const baseConfig = require('./baseConfig')
 const mergeWith = require('lodash/mergeWith')
+const isPlainObject = require('lodash/isPlainObject')
 
 const OPTS_MATRIX = [
   ['port', 'PORT', 3999],
@@ -71,5 +72,14 @@ module.exports = (config = {}) => {
     }
   })
 
-  return processConfig(result)
+  const newConfig = processConfig(result)
+  if (!isPlainObject(newConfig)) {
+    throw new Error('Configuration must be a plain object')
+  }
+
+  if (newConfig.images.maxSize > 16383) {
+    throw new Error('`images.maxSize` must be 16383 or lower (WebP-limit)')
+  }
+
+  return newConfig
 }

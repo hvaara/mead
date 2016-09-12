@@ -4,6 +4,7 @@
 - [ ] Limits (input/output size etc)
 - [ ] Disable transformations
 - [ ] Pluggable transformations
+- [ ] Width/height as 0-1 float
 - [ ] Add more transformations
   - [x] Fit params
   - [x] Focal point

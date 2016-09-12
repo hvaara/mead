@@ -5,6 +5,7 @@
   },
   "extends": "bengler",
   "rules": {
-    "prefer-rest-params": 0
+    "prefer-rest-params": 0,
+    "guard-for-in": 0
   }
 }
