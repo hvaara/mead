@@ -1,0 +1,12 @@
+.nyc_output
+assets/mead.min.svg
+assets/mead.png
+assets/mead.svg
+coverage
+test
+.editorconfig
+.eslintrc
+.eslintignore
+.travis.yml
+.dockerignore
+Dockerfile
