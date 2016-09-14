@@ -20,7 +20,7 @@ const pipeline = [
   trim,
   fit,
   resize,
-  rotation,
+  orientation,
   flip,
   pad,
   border,
@@ -370,10 +370,10 @@ function clamp(inp, min, max) {
   return Math.min(max, Math.max(min, Math.round(inp)))
 }
 
-function rotation(tr, params) {
+function orientation(tr, params) {
   // Auto-rotate by EXIF if no rotation is explicitly set
-  if (isDefined(params.rotation)) {
-    tr.rotate(params.rotation)
+  if (isDefined(params.orientation)) {
+    tr.rotate(params.orientation)
   } else {
     tr.rotate()
   }

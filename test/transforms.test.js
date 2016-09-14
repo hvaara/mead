@@ -24,15 +24,15 @@ test('[transforms] translates `q` param into numeric `quality`', t => {
   t.end()
 })
 
-test('[transforms] translates `rot` param into numeric `rotation`', t => {
-  const {rotation} = mapQueryParameters({rot: '90'})
-  t.equal(rotation, 90)
+test('[transforms] translates `or` param into numeric `orientation`', t => {
+  const {orientation} = mapQueryParameters({or: '90'})
+  t.equal(orientation, 90)
   t.end()
 })
 
-test('[transforms] throws if `rot` param is not 0, 90, 180 or 270', t => {
-  t.throws(() => mapQueryParameters({rot: '15'}), /must be one of/)
-  t.throws(() => mapQueryParameters({rot: '89'}), /must be one of/)
+test('[transforms] throws if `or` param is not 0, 90, 180 or 270', t => {
+  t.throws(() => mapQueryParameters({or: '15'}), /must be one of/)
+  t.throws(() => mapQueryParameters({or: '89'}), /must be one of/)
   t.end()
 })
 
@@ -87,7 +87,7 @@ test('[transforms] throws if passing non-integers to integer params', t => {
   t.throws(() => mapQueryParameters({w: 'foo'}), /valid integer/)
   t.throws(() => mapQueryParameters({h: 'foo'}), /valid integer/)
   t.throws(() => mapQueryParameters({q: 'foo'}), /valid integer/)
-  t.throws(() => mapQueryParameters({rot: 'foo'}), /valid integer/)
+  t.throws(() => mapQueryParameters({or: 'foo'}), /valid integer/)
   t.end()
 })
 
@@ -95,7 +95,7 @@ test('[transforms] throws if passing floats to integer params', t => {
   t.throws(() => mapQueryParameters({w: '18.541'}), /valid integer/)
   t.throws(() => mapQueryParameters({h: '155.1'}), /valid integer/)
   t.throws(() => mapQueryParameters({q: '87.4'}), /valid integer/)
-  t.throws(() => mapQueryParameters({rot: '56.4'}), /valid integer/)
+  t.throws(() => mapQueryParameters({or: '56.4'}), /valid integer/)
   t.end()
 })
 

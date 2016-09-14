@@ -23,7 +23,7 @@ module.exports = (request, response, next) => {
 
   let params
   try {
-    params = mapQueryParameters(request.query, transformationOpts)
+    params = mapQueryParameters(request.query)
   } catch (err) {
     next(err instanceof ValidationError ? Boom.badRequest(err) : err)
     return

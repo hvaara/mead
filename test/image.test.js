@@ -30,11 +30,11 @@ test('[image] image route serves plain image without transformations', t => {
   })
 })
 
-test('[image] image route serves image with rotation transformation', t => {
+test('[image] image route serves image with orientation transformation', t => {
   app((err, mead) => {
     t.ifError(err, 'no error on boot')
     request(mead)
-      .get('/foo/images/320x180.png?rot=90')
+      .get('/foo/images/320x180.png?or=90')
       .expect(200)
       .end((reqErr, res) => {
         t.ifError(reqErr, 'no error')

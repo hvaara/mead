@@ -35,7 +35,7 @@ const queryMap = [
   ['blur', 'blur', intBetween(1, 2000)],
 
   // Changes dimensions
-  ['rot', 'rotation', int, enumz([0, 90, 180, 270])],
+  ['or', 'orientation', int, enumz([0, 90, 180, 270])],
   ['flip', 'flip', enumz(['h', 'v', 'hv'])],
   ['fit', 'fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])],
   ['crop', 'crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
@@ -161,9 +161,11 @@ function getOneOf(values) {
 
 function enumz(values) {
   return (param, value) => {
-    if (!values.includes(value)) {
-      throw new ValidationError(`Parameter "${param}" - ${getOneOf(values)}`)
-    }
+    (Array.isArray(value) ? value : [value]).forEach(val => {
+      if (!values.includes(val)) {
+        throw new ValidationError(`Parameter "${param}" - ${getOneOf(values)}`)
+      }
+    })
 
     return value
   }
