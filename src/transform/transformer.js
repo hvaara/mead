@@ -170,11 +170,20 @@ function fitScale(tr, params, meta, opts) {
 }
 
 function fitFill(tr, params, meta, opts) {
-  const size = params.outputSize = opts.constrain(
-    opts.getOutputSize({sizeMode: 'embed'})
+  const sizeMode = params.backgroundColor ? 'embed' : 'max'
+  const {width, height} = params.outputSize = opts.constrain(
+    opts.getOutputSize({sizeMode})
   )
 
-  tr.embed().resize(size.width, size.height)
+  if (sizeMode === 'embed') {
+    tr.embed().resize(width, height)
+  } else {
+    const isLandscape = width > height
+    tr.max().resize(
+      isLandscape ? width : undefined,
+      isLandscape ? undefined : height
+    )
+  }
 }
 
 function fitFillMax(tr, params, meta, opts) {
@@ -191,8 +200,10 @@ function fitFillMax(tr, params, meta, opts) {
     isLandscape ? undefined : height
   )
 
-  if ((!params.height && width < meta.width)
-    || (!params.width && height < meta.height)) {
+  const atMax = (!params.height && width < meta.width) || (!params.width && height < meta.height)
+  const shouldExtend = params.backgroundColor && !atMax
+
+  if (!shouldExtend) {
     return
   }
 
@@ -381,7 +392,7 @@ function orientation(tr, params) {
 
 function background(tr, params, meta) {
   if (params.backgroundColor) {
-    tr.background(params.backgroundColor)
+    tr.background(params.backgroundColor).flatten()
     return
   }
 

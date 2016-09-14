@@ -5,6 +5,8 @@ const qs = require('querystring')
 const pify = require('pify')
 const sharp = require('sharp')
 const request = require('supertest')
+const getPixels = require('get-pixels')
+const colorString = require('color-string')
 const mead = require('../..')
 const getConfig = require('../../src/config')
 const sources = [{
@@ -49,5 +51,51 @@ exports.assertSize = (opts, assert, t) => {
   }).catch(err => {
     t.ifError(err, 'no error on boot')
     t.end()
+  })
+}
+
+exports.readImage = imgPath => {
+  return exports.appify().then(server => new Promise((resolve, reject) => {
+    request(server)
+      .get(`/foo/images/${imgPath}`)
+      .expect(200)
+      .end((err, res) => {
+        return err ? reject(err) : resolve(imgify(res.body))
+      })
+  }))
+}
+
+function imgify(body) {
+  return new Promise((resolve, reject) => {
+    if (!Buffer.isBuffer(body)) {
+      reject(new Error(`Body is not a buffer: ${JSON.stringify(body)}`))
+      return
+    }
+
+    const img = {}
+    sharp(body).png().toBuffer((err, data, info) => {
+      if (err) {
+        reject(err)
+        return
+      }
+
+      img.width = info.width
+      img.height = info.height
+
+      getPixels(data, `image/${info.format}`, (imgErr, px) => {
+        if (imgErr) {
+          reject(imgErr)
+          return
+        }
+
+        img.colorAt = (x, y) => {
+          const pixel = px.pick(x, y).data.slice(0, 3)
+          const color = colorString.to.hex(pixel).toLowerCase()
+          return color.replace(/^#/, '')
+        }
+
+        resolve(img)
+      })
+    })
   })
 }
