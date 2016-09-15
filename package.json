@@ -31,7 +31,6 @@
   },
   "homepage": "https://github.com/rexxars/mead#readme",
   "devDependencies": {
-    "color-string": "^1.2.0",
     "eslint": "^3.3.1",
     "eslint-config-bengler": "^2.0.0",
     "faucet": "0.0.1",

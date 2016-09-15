@@ -6,7 +6,6 @@ const pify = require('pify')
 const sharp = require('sharp')
 const request = require('supertest')
 const getPixels = require('get-pixels')
-const colorString = require('color-string')
 const mead = require('../..')
 const getConfig = require('../../src/config')
 const sources = [{
@@ -90,8 +89,7 @@ function imgify(body) {
 
         img.colorAt = (x, y) => {
           const pixel = px.pick(x, y).data.slice(0, 3)
-          const color = colorString.to.hex(pixel).toLowerCase()
-          return color.replace(/^#/, '')
+          return pixel.map(dec => dec.toString(16)).join('')
         }
 
         resolve(img)
