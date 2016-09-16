@@ -4,6 +4,7 @@ const transformer = require('../transform/transformer')
 const mapQueryParameters = require('../transform/mapQueryParameters')
 const errorTransformer = require('../transform/errorTransformer')
 const ValidationError = require('../errors/validationError')
+const adjustParameters = require('../transform/adjustParameters')
 
 const mimeTypes = {
   jpeg: 'image/jpeg',
@@ -16,10 +17,7 @@ const mimeTypes = {
 module.exports = (request, response, next) => {
   const {sourceAdapter} = response.locals
   const urlPath = request.params['0']
-
-  const transformationOpts = {
-    maxSize: request.app.locals.config.images.maxSize
-  }
+  const config = request.app.locals.config
 
   let params
   try {
@@ -47,9 +45,17 @@ module.exports = (request, response, next) => {
         return
       }
 
-      const transformStream = transformer(imageStream, params, meta, transformationOpts)
+      let finalParams
+      try {
+        finalParams = adjustParameters(params, meta, config)
+      } catch (paramsErr) {
+        handleError(paramsErr)
+        return
+      }
+
+      const transformStream = transformer(imageStream, finalParams, meta)
       transformStream
-        .on('info', info => sendHeaders(info, params, response))
+        .on('info', info => sendHeaders(info, finalParams, response))
         .pipe(response)
         .on('error', handleError)
     })

@@ -11,7 +11,6 @@ const defaultBgColor = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
 
 const pipeline = [
   sourceRect,
-  applyDpr,
   quality,
   background,
   invert,
@@ -39,10 +38,9 @@ const fitHandlers = {
   clip: fitClip
 }
 
-function getTransformer(tr, params, meta, opts) {
+function getTransformer(tr, params, meta) {
   const options = {
-    maxSize: opts.maxSize,
-    constrain: targetSize => constrainSize(opts.maxSize, meta, targetSize),
+    constrain: targetSize => constrainSize(params.maxSize, meta, targetSize),
     getOutputSize: sizeOpts => getOutputSize(params, meta, sizeOpts),
     paramsSize: size => sizeFromParams(params, size)
   }
@@ -65,20 +63,6 @@ function sourceRect(tr, params, meta) {
   }
 
   tr.extract({left, top, width, height})
-}
-
-function applyDpr(tr, params) {
-  if (params.dpr === 1) {
-    return
-  }
-
-  if (params.width) {
-    params.width *= params.dpr
-  }
-
-  if (params.height) {
-    params.height *= params.dpr
-  }
 }
 
 function quality(tr, params) {
@@ -121,8 +105,8 @@ function resize(tr, params, meta, opts) {
   }
 
   const isLandscape = meta.width > meta.height
-  const size = params.width > opts.maxSize || params.height > opts.maxSize
-    ? getNewSizeForAspectRatio({[isLandscape ? 'width' : 'height']: opts.maxSize}, meta)
+  const size = params.width > params.maxSize || params.height > params.maxSize
+    ? getNewSizeForAspectRatio({[isLandscape ? 'width' : 'height']: params.maxSize}, meta)
     : params
 
   tr.resize(size.width, size.height)
@@ -209,8 +193,8 @@ function fitFillMax(tr, params, meta, opts) {
 
   const aspect = meta.width / meta.height
 
-  const targetWidth = Math.min(params.width || Math.round(params.height * aspect), opts.maxSize)
-  const targetHeight = Math.min(params.height || Math.round(params.width / aspect), opts.maxSize)
+  const targetWidth = Math.min(params.width || Math.round(params.height * aspect), params.maxSize)
+  const targetHeight = Math.min(params.height || Math.round(params.width / aspect), params.maxSize)
 
   let resizeWidth = Math.min(targetWidth, meta.width)
   let resizeHeight = Math.min(targetHeight, meta.height)
@@ -346,8 +330,8 @@ function fitGravityCrop(tr, params, meta, opts) {
     : params.crop
 
   const {width, height} = getNewSizeForAspectRatio(params, meta)
-  const targetWidth = clamp(width, params.minWidth, Math.min(opts.maxSize, params.maxWidth))
-  const targetHeight = clamp(height, params.minHeight, Math.min(opts.maxSize, params.maxHeight))
+  const targetWidth = clamp(width, params.minWidth, Math.min(params.maxSize, params.maxWidth))
+  const targetHeight = clamp(height, params.minHeight, Math.min(params.maxSize, params.maxHeight))
 
   tr
     .resize(targetWidth, targetHeight)
@@ -433,7 +417,7 @@ function border(tr, params, meta) {
 
   const borderImg = drawBorder(
     params.outputSize,
-    params.border.size * params.dpr,
+    params.border.size,
     params.border.color
   )
 
@@ -447,7 +431,7 @@ function pad(tr, params, meta) {
   }
 
   if (params.width || params.height) {
-    const size = params.pad * 2 * params.dpr
+    const size = params.pad * 2
     const width = params.width ? params.width - size : undefined
     const height = params.height ? params.height - size : undefined
     tr.resize(width, height)
@@ -459,7 +443,7 @@ function pad(tr, params, meta) {
     }
   }
 
-  tr.extend(params.pad * params.dpr)
+  tr.extend(params.pad)
 }
 
 function overlays(tr, params, meta) {
@@ -486,14 +470,14 @@ function getNewSizeForAspectRatio(target, original) {
   return newSize
 }
 
-function constrainOriginal(tr, params, meta, opts) {
+function constrainOriginal(tr, params, meta) {
   if (params.width || params.height) {
     // Expect us to already be constrained
     return
   }
 
   const out = params.outputSize
-  const max = opts.maxSize
+  const max = params.maxSize
 
   // Do we need to be constrained?
   if (!out || (out.width < max && out.height < max)) {

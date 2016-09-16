@@ -52,11 +52,11 @@ function initApp(app, config, callback) {
 
   // Dem routes
   const pre = config.sourceMode === 'path' ? '/:source' : ''
-  app.get(`${pre}/*`, require('./controllers/image'))
-
   if (pre) {
     app.get(`${pre}`, (req, res, next) => next(Boom.notFound('Image path missing from URL')))
   }
+
+  app.get(`${pre}/*`, require('./controllers/image'))
 
   // Error handler
   app.use(errorHandler)

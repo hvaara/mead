@@ -259,7 +259,7 @@ tests.forEach(it => {
   const filename = operation.split('.', 2)[0]
   const fit = (operation.match(/&fit=(.*?)(&|$)/) || [])[1] || 'default'
 
-  test(`[resize] ${filename} using ${fit} (auto-test #${testNum})`, t => {
+  test(`[resize] [${testNum}] ${filename} using ${fit}`, t => {
     readImage(`/${operation}`).then(img => {
       if (expected.calc.w) {
         const range = {min: expected.w - 1, max: expected.w + 1}
