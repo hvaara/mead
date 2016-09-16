@@ -13,6 +13,7 @@ const queryMap = [
   ['fm', 'output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
 
   // Affects sizes throughout
+  ['ch', 'clientHints', split, enumz(['Save-Data', 'Viewport-Width', 'Width', 'DPR'])],
   ['dpr', 'dpr', numBetween(0, 5), toFixed(2)],
   ['max-h', 'maxHeight', ifCrop(int)],
   ['max-w', 'maxWidth', ifCrop(int)],
