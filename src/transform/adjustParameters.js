@@ -1,7 +1,22 @@
+const ValidationError = require('../errors/validationError')
+
 module.exports = (params, meta, config) => {
   applyMaxSize(params, config)
   applyDpr(params)
+  validateSourceRectCoords(params, meta)
   return params
+}
+
+function validateSourceRectCoords(params, meta) {
+  const rect = params.sourceRectangle
+  if (!rect) {
+    return
+  }
+
+  const [left, top, width, height] = rect
+  if (left + width > meta.width || top + height > meta.height) {
+    throw new ValidationError('Source rectangle coordinates out of bounds')
+  }
 }
 
 function applyMaxSize(params, config) {

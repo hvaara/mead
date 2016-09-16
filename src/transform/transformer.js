@@ -56,12 +56,6 @@ function sourceRect(tr, params, meta) {
   }
 
   const [left, top, width, height] = rect
-
-  if (left + width > meta.width || top + height > meta.height) {
-    // @todo throw?
-    return
-  }
-
   tr.extract({left, top, width, height})
 }
 

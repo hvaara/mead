@@ -106,6 +106,16 @@ test('[image] 400s on invalid transformation params', t => {
   })
 })
 
+test('[image] 400s on invalid source rectangle coordinates', t => {
+  app((err, mead) => {
+    t.ifError(err, 'no error on boot')
+    request(mead)
+      .get('/foo/images/mead.png?rect=256,256,512,512')
+      .expect('Content-Type', /json/)
+      .expect(400, t.end)
+  })
+})
+
 test('[image] sends content-disposition if download flag is set', t => {
   app((err, mead) => {
     t.ifError(err, 'no error on boot')
