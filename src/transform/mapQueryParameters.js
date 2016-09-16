@@ -2,6 +2,7 @@
 const Color = require('color')
 const sharp = require('sharp')
 const defaults = require('lodash/defaults')
+const cloneDeep = require('lodash/cloneDeep')
 const isUndefined = require('lodash/isUndefined')
 const ValidationError = require('../errors/validationError')
 
@@ -13,6 +14,7 @@ const queryMap = [
   ['fm', 'output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
 
   // Affects sizes throughout
+  ['ch', 'clientHints', split, enumz(['Save-Data', 'Viewport-Width', 'Width', 'DPR'])],
   ['dpr', 'dpr', numBetween(0, 5), toFixed(2)],
   ['max-h', 'maxHeight', ifCrop(int)],
   ['max-w', 'maxWidth', ifCrop(int)],
@@ -57,7 +59,9 @@ const defaultParameters = {
   maxWidth: +Infinity,
   minWidth: -Infinity,
   maxHeight: +Infinity,
-  minHeight: -Infinity
+  minHeight: -Infinity,
+
+  responseHeaders: {}
 }
 
 function mapQueryParameters(queryString) {
@@ -83,7 +87,7 @@ function mapQueryParameters(queryString) {
 
     params[name] = value
     return params
-  }, {}), defaultParameters)
+  }, {}), cloneDeep(defaultParameters))
 }
 
 function split(param, input) {

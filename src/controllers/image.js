@@ -47,7 +47,7 @@ module.exports = (request, response, next) => {
 
       let finalParams
       try {
-        finalParams = adjustParameters(params, meta, config)
+        finalParams = adjustParameters(params, meta, config, request.headers)
       } catch (paramsErr) {
         handleError(paramsErr)
         return
@@ -86,6 +86,13 @@ function sendHeaders(info, params, response) {
     const name = `"${encodeURIComponent(params.download || '')}"`
     response.setHeader('Content-Disposition', `attachment;filename=${name}`)
   }
+
+  // Parameter-based headers
+  const paramHeaders = params.responseHeaders || {}
+  Object.keys(paramHeaders).forEach(header => {
+    const value = paramHeaders[header]
+    response.setHeader(header, Array.isArray(value) ? value.join(',') : value)
+  })
 
   // Shameless promotion
   response.setHeader('X-Powered-By', 'mead.science')

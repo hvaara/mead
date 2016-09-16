@@ -259,8 +259,8 @@ function fitFocalCrop(tr, params, meta, opts) {
   }
 
   const crop = {
-    left: Math.round(pos.left),
-    top: Math.round(pos.top),
+    left: Math.floor(pos.left),
+    top: Math.floor(pos.top),
     width: Math.round(targetWidth),
     height: Math.round(targetHeight)
   }

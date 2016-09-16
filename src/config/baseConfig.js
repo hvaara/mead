@@ -23,5 +23,12 @@ module.exports = {
 
   images: {
     maxSize: 8192
+  },
+
+  clientHints: {
+    enabled: true,
+    optIn: true,
+    // false/0 means "dont use viewport scaling"
+    viewportScale: 2
   }
 }

@@ -40,13 +40,24 @@ exports.assertImageMeta = (res, target, t) => {
 
 exports.assertSize = (opts, assert, t) => {
   return (opts.mead ? opts.mead : exports.appify()).then(server => {
-    request(server)
+    const req = request(server)
       .get(`/foo/images/${opts.fixture || '300x200.png'}?${qs.stringify(opts.query)}`)
-      .expect(opts.statusCode || 200)
-      .end((reqErr, res) => {
-        t.ifError(reqErr, 'shouldnt error')
-        exports.assertImageMeta(res, assert, t)
-      })
+
+    const headers = opts.headers || {}
+    Object.keys(headers).forEach(header => {
+      req.set(header, headers[header])
+    })
+
+    const resHeaders = opts.resHeaders || {}
+    Object.keys(resHeaders).forEach(header => {
+      req.expect(header, resHeaders[header])
+    })
+
+    req.expect(opts.statusCode || 200)
+    req.end((reqErr, res) => {
+      t.ifError(reqErr, 'shouldnt error')
+      exports.assertImageMeta(res, assert, t)
+    })
   }).catch(err => {
     t.ifError(err, 'no error on boot')
     t.end()

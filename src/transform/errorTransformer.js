@@ -18,5 +18,5 @@ module.exports = err => {
     }
   }
 
-  return err.isBoom ? err : Boom.badImplementation(err)
+  return err.isBoom ? err : Boom.wrap(err)
 }
