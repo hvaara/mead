@@ -22,8 +22,8 @@ const queryMap = [
   ['min-w', 'minWidth', ifCrop(int)],
 
   // Basic operations
-  ['w', 'width', int],
-  ['h', 'height', int],
+  ['w', 'width', intOrFraction],
+  ['h', 'height', intOrFraction],
   ['q', 'quality', intBetween(0, 100)],
   ['bg', 'backgroundColor', color],
 
@@ -119,6 +119,15 @@ function num(param, value) {
   }
 
   return val
+}
+
+function intOrFraction(param, value) {
+  const val = num(param, value)
+  if (val <= 0) {
+    throw new ValidationError(`Parameter "${param}" must be a positive number`)
+  }
+
+  return val > 1 ? int(param, value) : val
 }
 
 function int(param, value) {

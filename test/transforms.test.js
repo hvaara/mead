@@ -84,10 +84,10 @@ test('[transforms] throws if `bg` param is not in known hex format', t => {
 })
 
 test('[transforms] throws if passing non-integers to integer params', t => {
-  t.throws(() => mapQueryParameters({w: 'foo'}), /valid integer/)
-  t.throws(() => mapQueryParameters({h: 'foo'}), /valid integer/)
-  t.throws(() => mapQueryParameters({q: 'foo'}), /valid integer/)
-  t.throws(() => mapQueryParameters({or: 'foo'}), /valid integer/)
+  t.throws(() => mapQueryParameters({w: 'foo'}), /valid (number|integer)/)
+  t.throws(() => mapQueryParameters({h: 'foo'}), /valid (number|integer)/)
+  t.throws(() => mapQueryParameters({q: 'foo'}), /valid (number|integer)/)
+  t.throws(() => mapQueryParameters({or: 'foo'}), /valid (number|integer)/)
   t.end()
 })
 

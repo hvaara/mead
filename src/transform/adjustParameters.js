@@ -4,6 +4,7 @@ const availableHints = ['Save-Data', 'Viewport-Width', 'Width', 'DPR']
 
 const pipeline = [
   validateSourceRectCoords,
+  fractionParamsToPixels,
   applyClientHints,
   applyMaxSize,
   applyDpr,
@@ -12,6 +13,16 @@ const pipeline = [
 module.exports = (params, meta, config, headers) => {
   pipeline.forEach(operation => operation(params, meta, config, headers))
   return params
+}
+
+function fractionParamsToPixels(params, meta) {
+  if (params.width && params.width <= 1) {
+    params.width *= meta.width
+  }
+
+  if (params.height && params.height <= 1) {
+    params.height *= meta.height
+  }
 }
 
 function applyClientHints(params, meta, config, headers) {

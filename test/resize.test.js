@@ -109,6 +109,17 @@ test('[resize] always scales to given size in scale mode, ignores aspect ratio (
 })
 
 /******************
+ * FRACTION SIZE  *
+ ******************/
+test('[resize] can use fractions of original width to resize', t => {
+  assertSize({mead, query: {w: 0.5}, fixture: 'mead.png'}, {width: 256, height: 256}, t)
+})
+
+test('[resize] can use fractions of original height to resize', t => {
+  assertSize({mead, query: {h: 0.25}, fixture: 'mead.png'}, {width: 128, height: 128}, t)
+})
+
+/******************
  * RUNTHROUGH     *
  ******************/
 const tests = [
