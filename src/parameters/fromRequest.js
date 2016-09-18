@@ -11,20 +11,12 @@ module.exports = (request, params, config) => {
 }
 
 function applyClientHints(params, config, request) {
-  const headers = request.headers
   const hintOptions = config.clientHints
   if (!hintOptions || !hintOptions.enabled) {
     return
   }
 
-  const enabled = (hintOptions.optIn ? params.clientHints : availableHints) || []
-  params.responseHeaders.Vary = [].concat(params.responseHeaders.Vary || [], enabled)
-
-  const hints = {}
-  for (let i = 0, hint; hint = enabled[i]; i++) {
-    hint = hint.toLowerCase()
-    hints[hint] = headers[hint]
-  }
+  const hints = getHintsFromRequest(params, request, hintOptions)
 
   if (hints['save-data']) {
     params.quality = params.quality ? Math.min(params.quality, 60) : 60
@@ -37,6 +29,22 @@ function applyClientHints(params, config, request) {
   }
 
   applyWidthFromHints(params, hints, hintOptions, useDpr)
+}
+
+function getHintsFromRequest(params, request, options) {
+  const headers = request.headers
+  const enabled = (options.optIn ? params.clientHints : availableHints) || []
+  if (enabled.length > 0) {
+    params.responseHeaders.Vary = [].concat(params.responseHeaders.Vary || [], enabled)
+  }
+
+  const hints = {}
+  for (let i = 0, hint; hint = enabled[i]; i++) {
+    hint = hint.toLowerCase()
+    hints[hint] = headers[hint]
+  }
+
+  return hints
 }
 
 function applyWidthFromHints(params, hints, hintOptions, useDpr) {
