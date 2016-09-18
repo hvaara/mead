@@ -1,4 +1,4 @@
-module.exports = function getOutputSize(params, meta, opts = {}) {
+module.exports = function getOutputSize(params, meta, opts) {
   let out = getInitialOutputParams(params, meta)
 
   if (opts.sizeMode === 'simple') {
@@ -62,14 +62,6 @@ function getOutputParamsFromExactSize(out, params, meta, sizeMode) {
       out.width = Math.round(meta.width / out.yFactor)
       out.xFactor = out.yFactor
     }
-  } else if (sizeMode === 'min') {
-    if (out.xFactor < out.yFactor) {
-      out.height = Math.round(meta.height / out.xFactor)
-      out.yFactor = out.xFactor
-    } else {
-      out.width = Math.round(meta.width / out.yFactor)
-      out.xFactor = out.yFactor
-    }
   }
 
   return out
@@ -78,9 +70,7 @@ function getOutputParamsFromExactSize(out, params, meta, sizeMode) {
 function getOutputParamsFromWidth(out, params, meta, sizeMode) {
   out.xFactor = meta.width / params.width
 
-  if (sizeMode === 'ignoreAspectRatio') {
-    out.height = meta.height
-  } else {
+  if (sizeMode !== 'ignoreAspectRatio') {
     out.yFactor = out.xFactor
     out.height = meta.height / out.yFactor
   }
@@ -91,9 +81,7 @@ function getOutputParamsFromWidth(out, params, meta, sizeMode) {
 function getOutputParamsFromHeight(out, params, meta, sizeMode) {
   out.yFactor = meta.height / params.height
 
-  if (sizeMode === 'ignoreAspectRatio') {
-    out.width = meta.width
-  } else {
+  if (sizeMode !== 'ignoreAspectRatio') {
     out.xFactor = out.yFactor
     out.width = meta.width / out.xFactor
   }

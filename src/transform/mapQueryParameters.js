@@ -40,7 +40,7 @@ const queryMap = [
   ['or', 'orientation', int, enumz([0, 90, 180, 270])],
   ['flip', 'flip', enumz(['h', 'v', 'hv'])],
   ['fit', 'fit', enumz(['clip', 'crop', 'fill', 'fillmax', 'max', 'scale', 'min'])],
-  ['crop', 'crop', crop(['top', 'bottom', 'left', 'right', 'focalpoint', 'entropy'])],
+  ['crop', 'crop', crop(['top', 'bottom', 'left', 'right', 'center', 'focalpoint', 'entropy'])],
   ['trim', 'trim', enumz(['auto', 'color'])],
   ['trimtol', 'trimTolerance', intBetween(1, 50)],
   ['pad', 'pad', int],
@@ -190,7 +190,6 @@ function presenceBool() {
 
 function ifCrop(validator) {
   return (param, value, params, qs) => {
-    // @todo pre-normalize to non-arrays so this works
     return qs.fit === 'crop' ? validator(param, value) : undefined
   }
 }
@@ -250,7 +249,8 @@ const cropPositionMap = {
   top: 'north',
   bottom: 'south',
   left: 'west',
-  right: 'east'
+  right: 'east',
+  center: 'center'
 }
 
 function crop(values) {

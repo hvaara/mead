@@ -3,9 +3,9 @@ const {appify, assertSize, readImage} = require('./helpers')
 
 const mead = appify()
 
-/******************
- * CLIP MODE      *
- ******************/
+/********************
+ * CLIP MODE        *
+ ********************/
 test('[resize] maintains aspect ratio by default', t => {
   assertSize({mead, query: {w: 256}, fixture: 'mead.png'}, {width: 256, height: 256}, t)
 })
@@ -18,9 +18,9 @@ test('[resize] upscales but maintains aspect ratio in clip mode', t => {
   assertSize({mead, query: {w: 600, h: 531, fit: 'clip'}}, {width: 600, height: 400}, t)
 })
 
-/******************
- * CROP MODE      *
- ******************/
+/********************
+ * CROP MODE        *
+ ********************/
 test('[resize] crops to match dimensions in crop mode', t => {
   assertSize({mead, query: {w: 300, h: 100, fit: 'crop'}}, {width: 300, height: 100}, t)
 })
@@ -29,9 +29,30 @@ test('[resize] crops to match dimensions in crop mode (square)', t => {
   assertSize({mead, query: {w: 200, h: 200, fit: 'crop'}}, {width: 200, height: 200}, t)
 })
 
-/******************
- * FILL MODE      *
- ******************/
+test('[resize] crops to focal point', t => {
+  readImage('landscape.png?fp-x=0.10&fp-y=.62&w=256&h=256&fit=crop&crop=focalpoint').then(img => {
+    t.equal(img.colorAt(5, 215), 'f59b07', 'color is correct on crop')
+    t.end()
+  })
+})
+
+test('[resize] crops to focal point (alt)', t => {
+  readImage('landscape.png?fp-x=.698&fp-y=0.367&w=256&h=256&fit=crop&crop=focalpoint').then(img => {
+    t.equal(img.colorAt(128, 96), '8e44ae', 'color is correct on crop')
+    t.end()
+  })
+})
+
+test('[resize] crops to focal point (square)', t => {
+  readImage('mead.png?fp-x=0.75&fp-y=0.75&w=256&h=256&fit=crop&crop=focalpoint').then(img => {
+    t.equal(img.colorAt(192, 192), 'ff9300', 'color is correct on crop')
+    t.end()
+  })
+})
+
+/********************
+ * FILL MODE        *
+ ********************/
 test('[resize] fills to match dimensions in fill mode (target larger than original)', t => {
   assertSize({mead, query: {w: 400, h: 420, bg: 'ccc', fit: 'fill'}}, {width: 400, height: 420}, t)
 })
@@ -40,9 +61,9 @@ test('[resize] fills to match dimensions in fill mode (target smaller than origi
   assertSize({mead, query: {w: 180, h: 150, bg: 'ccc', fit: 'fill'}}, {width: 180, height: 150}, t)
 })
 
-/******************
- * FILLMAX MODE   *
- ******************/
+/********************
+ * FILLMAX MODE     *
+ ********************/
 test('[resize] fills to match dimensions in fillmax mode (target larger than original)', t => {
   assertSize({mead, query: {w: 400, h: 420, bg: 'ccc', fit: 'fillmax'}}, {width: 400, height: 420}, t)
 })
@@ -51,9 +72,19 @@ test('[resize] fills to match dimensions in fillmax mode (target smaller than or
   assertSize({mead, query: {w: 180, h: 150, bg: 'ccc', fit: 'fillmax'}}, {width: 180, height: 150}, t)
 })
 
-/******************
- * MAX MODE       *
- ******************/
+test('[resize] fills the remainder of the size with background color', t => {
+  readImage('mead.png?w=256&h=512&fit=fillmax&bg=bf1942').then(img => {
+    t.equal(img.width, 256, 'correct width')
+    t.equal(img.height, 512, 'correct height')
+    t.equal(img.colorAt(0, 0), 'bf1942', 'correct color (top)')
+    t.equal(img.colorAt(0, 511), 'bf1942', 'correct color (bottom)')
+    t.end()
+  })
+})
+
+/********************
+ * MAX MODE         *
+ ********************/
 test('[resize] resizes to maximum of original size in max mode', t => {
   assertSize({mead, query: {w: 400, h: 420, fit: 'max'}}, {width: 300, height: 200}, t)
 })
@@ -62,9 +93,9 @@ test('[resize] resizes to less than original size in max mode (maintains aspect)
   assertSize({mead, query: {w: 180, h: 150, fit: 'max'}}, {width: 180, height: 120}, t)
 })
 
-/******************
- * MIN MODE       *
- ******************/
+/********************
+ * MIN MODE         *
+ ********************/
 test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#1)', t => {
   assertSize({mead, query: {w: 500, h: 2000, fit: 'min'}}, {width: 50, height: 200}, t)
 })
@@ -97,9 +128,9 @@ test('[resize] resizes/crops to given aspect ratio, not exceeding original size 
   assertSize({mead, query: {w: 200, h: 180, fit: 'min'}}, {width: 200, height: 180}, t)
 })
 
-/******************
- * SCALE MODE     *
- ******************/
+/********************
+ * SCALE MODE       *
+ ********************/
 test('[resize] always scales to given size in scale mode, ignores aspect ratio (#1)', t => {
   assertSize({mead, query: {w: 400, h: 420, fit: 'scale'}}, {width: 400, height: 420}, t)
 })
@@ -108,9 +139,9 @@ test('[resize] always scales to given size in scale mode, ignores aspect ratio (
   assertSize({mead, query: {w: 177, h: 981, fit: 'scale'}}, {width: 177, height: 981}, t)
 })
 
-/******************
- * FRACTION SIZE  *
- ******************/
+/********************
+ * FRACTION SIZE    *
+ ********************/
 test('[resize] can use fractions of original width to resize', t => {
   assertSize({mead, query: {w: 0.5}, fixture: 'mead.png'}, {width: 256, height: 256}, t)
 })
@@ -119,9 +150,40 @@ test('[resize] can use fractions of original height to resize', t => {
   assertSize({mead, query: {h: 0.25}, fixture: 'mead.png'}, {width: 128, height: 128}, t)
 })
 
-/******************
- * RUNTHROUGH     *
- ******************/
+/**********************
+ * MAX WIDTH/HEIGHT   *
+ **********************/
+test('[resize] can give a max width when fit is "crop"', t => {
+  assertSize(
+    {mead, query: {'max-w': 512, 'h': 500, 'fit': 'crop'}, fixture: 'landscape.png'},
+    {width: 512, height: 500}, t
+  )
+})
+
+test('[resize] can give a max height when fit is "crop"', t => {
+  assertSize(
+    {mead, query: {'max-h': 400, 'w': 800, 'fit': 'crop'}, fixture: 'landscape.png'},
+    {width: 800, height: 400}, t
+  )
+})
+
+test('[resize] max width does nothing if fit is not "crop"', t => {
+  assertSize(
+    {mead, query: {'max-w': 512, 'h': 500}, fixture: 'landscape.png'},
+    {width: 988, height: 500}, t
+  )
+})
+
+test('[resize] max height does nothing if fit is not "crop"', t => {
+  assertSize(
+    {mead, query: {'max-h': 400, 'w': 800}, fixture: 'landscape.png'},
+    {width: 800, height: 405}, t
+  )
+})
+
+/********************
+ * RUNTHROUGH       *
+ ********************/
 const tests = [
   ['001', 'portrait.png?h=1250&fit=crop', {w: 1008, h: 1250, calc: {w: 1}}],
   ['002', 'portrait.png?h=1250&fit=fill', {w: 1007, h: 1250, calc: {w: 1}}],

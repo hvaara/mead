@@ -98,13 +98,40 @@ function imgify(body) {
           return
         }
 
+        img.colorAtIsApprox = (x, y, color, t, threshold = 12) => {
+          const actualHex = img.colorAt(x, y)
+          const actual = actualHex.match(/.{2}/g).map(decify)
+          const target = color.match(/.{2}/g).map(decify)
+          const distance = target.reduce((dist, col, i) => dist + Math.abs(col - actual[i]), 0)
+          if (distance <= threshold) {
+            t.pass('color within range')
+          } else {
+            t.fail(`color ${actualHex} out of range (${distance} > ${threshold})`)
+          }
+        }
+
         img.colorAt = (x, y) => {
-          const pixel = px.pick(x, y).data.slice(0, 3)
-          return pixel.map(dec => dec.toString(16)).join('')
+          const pixel = []
+          const pointer = px.offset + (px.stride[0] * x) + (px.stride[1] * y)
+
+          for (let i = 0; i < 3; i++) {
+            pixel.push(px.data[pointer + (px.stride[2] * i)])
+          }
+
+          return pixel.map(hexify).join('')
         }
 
         resolve(img)
       })
     })
   })
+}
+
+function hexify(dec) {
+  const hex = dec.toString(16)
+  return dec < 16 ? `0${hex}` : hex
+}
+
+function decify(hex) {
+  return parseInt(hex, 16)
 }
