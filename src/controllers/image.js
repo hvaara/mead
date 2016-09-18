@@ -1,10 +1,9 @@
 const Boom = require('boom')
 const sharp = require('sharp')
+const parameters = require('../parameters')
 const transformer = require('../transform/transformer')
-const mapQueryParameters = require('../transform/mapQueryParameters')
 const errorTransformer = require('../transform/errorTransformer')
 const ValidationError = require('../errors/validationError')
-const adjustParameters = require('../transform/adjustParameters')
 
 const mimeTypes = {
   jpeg: 'image/jpeg',
@@ -19,9 +18,10 @@ module.exports = (request, response, next) => {
   const urlPath = request.params['0']
   const config = request.app.locals.config
 
-  let params
+  let params = {}
   try {
-    params = mapQueryParameters(request.query)
+    params = parameters.fromQueryString(request.query, params, config)
+    params = parameters.fromRequest(request, params, config)
   } catch (err) {
     next(err instanceof ValidationError ? Boom.badRequest(err) : err)
     return
@@ -47,7 +47,7 @@ module.exports = (request, response, next) => {
 
       let finalParams
       try {
-        finalParams = adjustParameters(params, meta, config, request.headers)
+        finalParams = parameters.finalize(parameters.fromMetadata(params, meta))
       } catch (paramsErr) {
         handleError(paramsErr)
         return

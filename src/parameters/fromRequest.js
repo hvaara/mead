@@ -1,31 +1,17 @@
-const ValidationError = require('../errors/validationError')
-
 const availableHints = ['Save-Data', 'Viewport-Width', 'Width', 'DPR']
 
 const pipeline = [
-  validateSourceRectCoords,
-  fractionParamsToPixels,
   applyClientHints,
   applyMaxSize,
-  applyDpr,
 ]
 
-module.exports = (params, meta, config, headers) => {
-  pipeline.forEach(operation => operation(params, meta, config, headers))
+module.exports = (request, params, config) => {
+  pipeline.forEach(operation => operation(params, config, request))
   return params
 }
 
-function fractionParamsToPixels(params, meta) {
-  if (params.width && params.width <= 1) {
-    params.width *= meta.width
-  }
-
-  if (params.height && params.height <= 1) {
-    params.height *= meta.height
-  }
-}
-
-function applyClientHints(params, meta, config, headers) {
+function applyClientHints(params, config, request) {
+  const headers = request.headers
   const hintOptions = config.clientHints
   if (!hintOptions || !hintOptions.enabled) {
     return
@@ -71,42 +57,6 @@ function applyWidthFromHints(params, hints, hintOptions, useDpr) {
   }
 }
 
-function applyMaxSize(params, meta, config, headers) {
+function applyMaxSize(params, config, request) {
   params.maxSize = config.images.maxSize
 }
-
-function applyDpr(params, meta, config, headers) {
-  const dpr = params.dpr
-  if (dpr === 1) {
-    return
-  }
-
-  if (params.width) {
-    params.width *= dpr
-  }
-
-  if (params.height) {
-    params.height *= dpr
-  }
-
-  if (params.pad) {
-    params.pad *= dpr
-  }
-
-  if (params.border) {
-    params.border.size *= dpr
-  }
-}
-
-function validateSourceRectCoords(params, meta, config, headers) {
-  const rect = params.sourceRectangle
-  if (!rect) {
-    return
-  }
-
-  const [left, top, width, height] = rect
-  if (left + width > meta.width || top + height > meta.height) {
-    throw new ValidationError('Source rectangle coordinates out of bounds')
-  }
-}
-

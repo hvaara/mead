@@ -64,7 +64,7 @@ const defaultParameters = {
   responseHeaders: {}
 }
 
-function mapQueryParameters(queryString) {
+function mapQueryParameters(queryString, parameters = {}) {
   const qs = queryMap.reduce((params, param) => {
     const [qParam] = param
     const val = queryString[qParam]
@@ -72,7 +72,7 @@ function mapQueryParameters(queryString) {
       params[qParam] = Array.isArray(val) ? val[0] : val
     }
     return params
-  }, {})
+  }, parameters)
 
   return defaults(queryMap.reduce((params, param) => {
     const [qParam, name, ...validators] = param
