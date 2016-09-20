@@ -103,6 +103,7 @@ function resize(tr, params, meta, opts) {
     ? getNewSizeForAspectRatio({[isLandscape ? 'width' : 'height']: params.maxSize}, meta)
     : params
 
+  params.outputSize = round(getOutputSize(params, meta, {sizeMode: 'simple'}))
   tr.resize(size.width, size.height)
 }
 

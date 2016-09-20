@@ -150,6 +150,16 @@ test('[resize] can use fractions of original height to resize', t => {
   assertSize({mead, query: {h: 0.25}, fixture: 'mead.png'}, {width: 128, height: 128}, t)
 })
 
+/********************
+ * OVERLAY + RESIZE *
+ ********************/
+test('[resize] can overlay when resizing', t => {
+  assertSize(
+    {mead, query: {w: 700, border: '10,ccbf1942'}, fixture: 'landscape.png'},
+    {width: 700}, t
+  )
+})
+
 /**********************
  * MAX WIDTH/HEIGHT   *
  **********************/
