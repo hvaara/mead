@@ -62,13 +62,15 @@ test('[transforms] translates `bg` param into `backgroundColor`', t => {
 
 test('[transforms] translates `bg` param into `backgroundColor` (alpha included)', t => {
   const {backgroundColor} = fromQueryString({bg: 'aaccddee'})
-  t.deepEqual(backgroundColor, {a: 2 / 3, b: 238, g: 221, r: 204})
+  t.equal(backgroundColor.valpha, 2 / 3)
+  t.deepEqual(backgroundColor.color, [204, 221, 238])
   t.end()
 })
 
 test('[transforms] translates `bg` param into `backgroundColor` (alpha included - alt)', t => {
   const {backgroundColor} = fromQueryString({bg: 'acde'})
-  t.deepEqual(backgroundColor, {a: 2 / 3, b: 238, g: 221, r: 204})
+  t.equal(backgroundColor.valpha, 2 / 3)
+  t.deepEqual(backgroundColor.color, [204, 221, 238])
   t.end()
 })
 

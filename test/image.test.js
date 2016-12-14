@@ -140,7 +140,7 @@ test('[image] sends correct cache-control when ttl is set on source', t => {
     t.ifError(err, 'no error on boot')
     request(mead)
       .get('/foo/images/mead.png')
-      .expect('Cache-Control', /max\-age=3600/)
+      .expect('Cache-Control', /max-age=3600/)
       .expect(200, t.end)
   })
 })

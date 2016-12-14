@@ -10,7 +10,7 @@ module.exports = (imgSize, size, clr) => {
       x="${size / 2}"
       y="${size / 2}"
       fill="none"
-      stroke="${color.hexString()}"
+      stroke="${color.hex()}"
       stroke-opacity="${color.alpha()}"
       stroke-width="${size}"
     />

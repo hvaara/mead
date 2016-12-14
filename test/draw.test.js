@@ -30,7 +30,7 @@ test('[draw] can draw border', t => {
 
 test('[draw] can draw border with opacity', t => {
   const size = 5
-  const color = {r: 255, g: 123, b: 18, a: 0.51}
+  const color = {r: 255, g: 123, b: 18, alpha: 0.51}
   const svg = drawBorder({width, height}, size, color)
 
   t.include(svg, `width="${width - size}"`, 'width')

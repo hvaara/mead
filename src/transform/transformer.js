@@ -6,12 +6,11 @@ const drawContainer = require('../draw/drawContainer')
 const getOutputSize = require('./outputSize')
 const constrainSize = require('./constrainSize')
 
-const defaultBgColorAlpha = {r: 255, g: 255, b: 255, a: 0} // eslint-disable-line id-length
+const defaultBgColorAlpha = {r: 255, g: 255, b: 255, alpha: 0} // eslint-disable-line id-length
 const defaultBgColor = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
 
 const pipeline = [
   sourceRect,
-  quality,
   background,
   invert,
   sharpen,
@@ -57,10 +56,6 @@ function sourceRect(tr, params, meta) {
 
   const [left, top, width, height] = rect
   tr.extract({left, top, width, height})
-}
-
-function quality(tr, params) {
-  tr.quality(params.quality || 75)
 }
 
 function invert(tr, params) {
@@ -394,14 +389,21 @@ function flip(tr, params) {
   }
 }
 
-function output(tr, params) {
+function output(tr, params, meta) {
   const out = params.output || {}
-  if (out.format) {
-    tr.toFormat(out.format)
+  const format = out.format || meta.format || 'jpeg'
+  const options = {}
+
+  if (params.quality && format !== 'png') {
+    options.quality = params.quality || 75
   }
 
-  if (out.progressive) {
-    tr.progressive()
+  if (out.progressive && format !== 'webp') {
+    options.progressive = true
+  }
+
+  if (out.format || params.quality) {
+    tr.toFormat(format, options)
   }
 }
 
