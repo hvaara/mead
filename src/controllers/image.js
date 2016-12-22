@@ -47,7 +47,7 @@ module.exports = (request, response, next) => {
 
       let finalParams
       try {
-        finalParams = parameters.finalize(parameters.fromMetadata(params, meta))
+        finalParams = parameters.finalize(parameters.fromMetadata(params, meta, config))
       } catch (paramsErr) {
         handleError(paramsErr)
         return

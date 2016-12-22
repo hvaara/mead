@@ -82,6 +82,20 @@ test('[image] image route serves image as progressive jpeg', t => {
   })
 })
 
+test('[image] image route can be told to serve unsupported output formats as different format', t => {
+  const inputFormatMap = {tiff: 'jpeg'}
+  app({inputFormatMap}, (err, mead) => {
+    t.ifError(err, 'no error on boot')
+    request(mead)
+      .get('/foo/images/tiff.tiff')
+      .expect(200)
+      .end((reqErr, res) => {
+        t.ifError(reqErr, 'no error')
+        assertImageMeta(res, {width: 100, height: 66, format: 'jpeg'}, t)
+      })
+  })
+})
+
 test('[image] image route serves image with flip transformation (h)', t => {
   app((err, mead) => {
     t.ifError(err, 'no error on boot')
