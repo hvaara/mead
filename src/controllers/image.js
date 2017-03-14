@@ -1,5 +1,6 @@
 const Boom = require('boom')
 const sharp = require('sharp')
+const values = require('lodash/values')
 const parameters = require('../parameters')
 const transformer = require('../transform/transformer')
 const errorTransformer = require('../transform/errorTransformer')
@@ -15,13 +16,22 @@ const mimeTypes = {
 
 module.exports = (request, response, next) => {
   const {sourceAdapter} = response.locals
+  const {config, plugins} = request.app.locals
   const urlPath = request.params['0']
-  const config = request.app.locals.config
+
+  const metadataResolvers = values(plugins['metadata-resolver'] || {})
+  const context = {request, response, urlPath}
+
+  let metadata = null
+  for (let i = 0; !metadata && i < metadataResolvers.length; i++) {
+    metadata = metadataResolvers[i](context)
+  }
 
   let params = {}
   try {
     params = parameters.fromQueryString(request.query, params, config)
     params = parameters.fromRequest(request, params, config)
+    params = metadata ? finalizeParams(metadata) : params
   } catch (err) {
     next(err instanceof ValidationError ? Boom.badRequest(err) : err)
     return
@@ -39,27 +49,33 @@ module.exports = (request, response, next) => {
       .pipe(imageStream)
       .on('error', handleError)
 
-    imageStream.metadata((imgErr, meta) => {
-      if (imgErr) {
-        handleError(imgErr)
-        return
-      }
+    const resolveParams = metadata
+      ? Promise.resolve(params)
+      : resolveMetadataFromImage(imageStream).then(finalizeParams)
 
-      let finalParams
-      try {
-        finalParams = parameters.finalize(parameters.fromMetadata(params, meta, config))
-      } catch (paramsErr) {
-        handleError(paramsErr)
-        return
-      }
-
-      const transformStream = transformer(imageStream, finalParams, meta)
-      transformStream
-        .on('info', info => sendHeaders(info, finalParams, response))
-        .pipe(response)
-        .on('error', handleError)
-    })
+    resolveParams
+      .then(finalParams => transform(imageStream, finalParams, metadata))
+      .catch(handleError)
   })
+
+  function transform(imageStream, finalParams) {
+    const transformStream = transformer(imageStream, finalParams, metadata)
+    transformStream
+      .on('info', info => sendHeaders(info, finalParams, response))
+      .pipe(response)
+      .on('error', handleError)
+  }
+
+  function finalizeParams(meta) {
+    return parameters.finalize(parameters.fromMetadata(params, meta, config))
+  }
+
+  function resolveMetadataFromImage(imageStream) {
+    return imageStream.metadata().then(meta => {
+      metadata = meta
+      return meta
+    })
+  }
 
   function handleError(err) {
     next(errorTransformer(err))
