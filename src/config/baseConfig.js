@@ -22,7 +22,8 @@ module.exports = {
   },
 
   images: {
-    maxSize: 8192
+    maxSize: 8192,
+    forceToFilenameFormat: false,
   },
 
   clientHints: {

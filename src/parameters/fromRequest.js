@@ -1,13 +1,41 @@
+const path = require('path')
+
 const availableHints = ['Save-Data', 'Viewport-Width', 'Width', 'DPR']
 
 const pipeline = [
   applyClientHints,
   applyMaxSize,
+  forceFormat,
 ]
 
 module.exports = (request, params, config) => {
   pipeline.forEach(operation => operation(params, config, request))
   return params
+}
+
+function forceFormat(params, config, request) {
+  if (!config.images.forceToFilenameFormat) {
+    return
+  }
+
+  if (params.output && params.output.format) {
+    return
+  }
+
+  const extension = path.extname(request.params['0']).replace(/^\./, '').replace('jpg', 'jpeg')
+  if (!extension) {
+    return
+  }
+
+  const formatMap = config.inputFormatMap || {}
+  const hasAlpha = extension !== 'jpeg'
+  const outputFormat = formatMap[extension] || (hasAlpha ? 'png' : 'jpeg')
+
+  params.output = {
+    format: outputFormat,
+    mime: `image/${outputFormat}`,
+    progressive: false
+  }
 }
 
 function applyClientHints(params, config, request) {
