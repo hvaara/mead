@@ -165,28 +165,28 @@ test('[resize] can overlay when resizing', t => {
  **********************/
 test('[resize] can give a max width when fit is "crop"', t => {
   assertSize(
-    {mead, query: {'max-w': 512, 'h': 500, 'fit': 'crop'}, fixture: 'landscape.png'},
+    {mead, query: {'max-w': 512, h: 500, fit: 'crop'}, fixture: 'landscape.png'},
     {width: 512, height: 500}, t
   )
 })
 
 test('[resize] can give a max height when fit is "crop"', t => {
   assertSize(
-    {mead, query: {'max-h': 400, 'w': 800, 'fit': 'crop'}, fixture: 'landscape.png'},
+    {mead, query: {'max-h': 400, w: 800, fit: 'crop'}, fixture: 'landscape.png'},
     {width: 800, height: 400}, t
   )
 })
 
 test('[resize] max width does nothing if fit is not "crop"', t => {
   assertSize(
-    {mead, query: {'max-w': 512, 'h': 500}, fixture: 'landscape.png'},
+    {mead, query: {'max-w': 512, h: 500}, fixture: 'landscape.png'},
     {width: 988, height: 500}, t
   )
 })
 
 test('[resize] max height does nothing if fit is not "crop"', t => {
   assertSize(
-    {mead, query: {'max-h': 400, 'w': 800}, fixture: 'landscape.png'},
+    {mead, query: {'max-h': 400, w: 800}, fixture: 'landscape.png'},
     {width: 800, height: 405}, t
   )
 })

@@ -1,14 +1,20 @@
 const ValidationError = require('../errors/validationError')
+const getMinimumInputSize = require('../transform/minimumInputSize')
 
 const pipeline = [
   validateSourceRectCoords,
   fractionParamsToPixels,
   mapOutputFormat,
+  minimumInputSize,
 ]
 
 module.exports = (params, meta, config) => {
   pipeline.forEach(operation => operation(params, meta, config))
   return params
+}
+
+function minimumInputSize(params, meta) {
+  params.minimumInputSize = getMinimumInputSize(params, meta)
 }
 
 function validateSourceRectCoords(params, meta) {

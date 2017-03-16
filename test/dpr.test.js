@@ -40,10 +40,10 @@ test('[dpr] downscaled image can still be cropped with focal point correctly', t
     mead,
     fixture: 'trim.jpg',
     query: {
-      'h': 250,
-      'dpr': 0.75,
-      'fit': 'crop',
-      'crop': 'focalpoint',
+      h: 250,
+      dpr: 0.75,
+      fit: 'crop',
+      crop: 'focalpoint',
       'fp-x': 0.251,
       'fp-y': 0.77
     }

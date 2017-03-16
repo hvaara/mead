@@ -1,5 +1,6 @@
 const responsiveCallback = require('responsive-callback')
 const validatePlugin = require('./validators/plugin')
+const flatten = require('lodash/flatten')
 const series = require('fastseries')()
 
 const cbOpts = {
@@ -13,7 +14,7 @@ const cbOpts = {
 
 const loadPlugins = (app, callback) => {
   try {
-    const plugins = app.locals.config.plugins || []
+    const plugins = flatten(app.locals.config.plugins || [])
     const register = plugins.map(plugin => plugin.register).filter(Boolean)
     const registry = plugins.reduce(assignPlugin, {})
 

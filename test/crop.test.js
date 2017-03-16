@@ -18,6 +18,6 @@ modes.forEach(mode => {
       t.equal(img.height, 300, 'correct height')
       img.colorAtIsApprox(x, y, color, t, 30)
       t.end()
-    })
+    }).catch(t.end)
   })
 })

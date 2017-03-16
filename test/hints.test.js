@@ -130,7 +130,7 @@ test('[hints] viewport-width hint adjusts width to scale factor when DPR is prov
   assertSize({
     mead,
     fixture: 'trim.jpg',
-    headers: {'Viewport-Width': 500, 'DPR': 2},
+    headers: {'Viewport-Width': 500, DPR: 2},
     query: {ch: 'Save-Data,Viewport-Width,DPR'}
   }, {width: 1000}, t)
 })

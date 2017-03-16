@@ -28,4 +28,9 @@ function applyDpr(params) {
   if (params.border) {
     params.border.size *= dpr
   }
+
+  if (params.minimumInputSize) {
+    params.minimumInputSize.width *= dpr
+    params.minimumInputSize.height *= dpr
+  }
 }

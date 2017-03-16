@@ -32,7 +32,7 @@
   "homepage": "https://github.com/rexxars/mead#readme",
   "devDependencies": {
     "eslint": "^3.17.1",
-    "eslint-config-bengler": "^3.0.1",
+    "eslint-config-bengler": "^3.1.2",
     "faucet": "0.0.1",
     "get-pixels": "^3.3.0",
     "nyc": "^10.1.2",
@@ -49,14 +49,14 @@
     "fastseries": "^1.7.2",
     "lodash": "^4.17.4",
     "mead-plugin-signature-md5": "^1.0.0",
-    "mead-plugin-source-fs": "^1.0.0",
-    "mead-plugin-source-proxy": "^1.0.1",
+    "mead-plugin-source-fs": "^2.0.0",
+    "mead-plugin-source-proxy": "^2.0.0",
     "mead-plugin-source-resolver-config": "^1.0.0",
     "mead-plugin-source-webfolder": "^1.0.0",
     "responsive-callback": "^1.0.1",
     "semver": "^5.3.0",
     "serve-favicon": "^2.4.1",
     "sharp": "^0.17.2",
-    "yargs": "^6.5.0"
+    "yargs": "^7.0.2"
   }
 }

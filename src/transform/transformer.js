@@ -99,7 +99,10 @@ function resize(tr, params, meta, opts) {
     : params
 
   params.outputSize = round(getOutputSize(params, meta, {sizeMode: 'simple'}))
-  tr.resize(size.width, size.height)
+  tr.resize(
+    size.width ? Math.round(size.width) : null,
+    size.height ? Math.round(size.height) : null
+  )
 }
 
 function fit(tr, params, meta) {
@@ -113,9 +116,8 @@ function fit(tr, params, meta) {
 }
 
 function fitClip(tr, params, meta, opts) {
-  const {width, height} = params.outputSize = opts.constrain(
-    opts.getOutputSize({sizeMode: 'max'})
-  )
+  params.outputSize = opts.constrain(opts.getOutputSize({sizeMode: 'max'}))
+  const {width, height} = params.outputSize
 
   const isLandscape = width > height
   tr.max().resize(
@@ -128,9 +130,8 @@ function fitScale(tr, params, meta, opts) {
   const hasExactSize = params.width && params.height
   const sizeMode = hasExactSize ? 'ignoreAspectRatio' : 'max'
 
-  const {width, height} = params.outputSize = opts.constrain(
-    opts.getOutputSize({sizeMode})
-  )
+  params.outputSize = opts.constrain(opts.getOutputSize({sizeMode}))
+  const {width, height} = params.outputSize
 
   const isLandscape = width > height
   let sizeWidth = width
@@ -145,9 +146,8 @@ function fitScale(tr, params, meta, opts) {
 
 function fitFill(tr, params, meta, opts) {
   const sizeMode = params.backgroundColor ? 'embed' : 'max'
-  const {width, height} = params.outputSize = opts.constrain(
-    opts.getOutputSize({sizeMode})
-  )
+  params.outputSize = opts.constrain(opts.getOutputSize({sizeMode}))
+  const {width, height} = params.outputSize
 
   if (sizeMode === 'embed') {
     tr.embed().resize(width, height)
@@ -161,13 +161,14 @@ function fitFill(tr, params, meta, opts) {
 }
 
 function fitFillMax(tr, params, meta, opts) {
-  const {width, height} = params.outputSize = opts.constrain(
+  params.outputSize = opts.constrain(
     opts.getOutputSize({
       sizeMode: 'max',
       withoutEnlargement: true
     })
   )
 
+  const {width, height} = params.outputSize
   const isLandscape = width > height
   tr.withoutEnlargement().max().resize(
     isLandscape ? width : undefined,
@@ -212,13 +213,14 @@ function fitFillMax(tr, params, meta, opts) {
 }
 
 function fitMax(tr, params, meta, opts) {
-  const {width, height} = params.outputSize = opts.constrain(
+  params.outputSize = opts.constrain(
     opts.getOutputSize({
       sizeMode: 'max',
       withoutEnlargement: true
     })
   )
 
+  const {width, height} = params.outputSize
   const isLandscape = width > height
   tr.withoutEnlargement().max().resize(
     isLandscape ? width : undefined,
@@ -279,17 +281,19 @@ function fitFocalCrop(tr, params, meta, opts) {
 
   tr.extract(crop)
 
-  params.outputSize = Object.assign({}, opts.constrain(opts.getOutputSize({sizeMode: 'crop'})), {
+  const outputSize = opts.getOutputSize({sizeMode: 'crop'})
+  const constrained = opts.constrain(outputSize)
+
+  params.outputSize = Object.assign({}, constrained, {
     width: crop.width,
     height: crop.height
   })
 }
 
 function fitMin(tr, params, meta, opts) {
-  const {width, height} = params.outputSize = opts.constrain(
-    opts.getOutputSize({sizeMode: 'simple'})
-  )
+  params.outputSize = opts.constrain(opts.getOutputSize({sizeMode: 'simple'}))
 
+  const {width, height} = params.outputSize
   tr.withoutEnlargement().resize(width, height).crop()
 
   if (width < meta.width && height < meta.height) {

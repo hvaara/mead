@@ -18,7 +18,8 @@ const sources = [{
   }
 }]
 
-const config = exports.config = (cfg = {}) => getConfig(Object.assign({sources}, cfg))
+const config = (cfg = {}) => getConfig(Object.assign({sources}, cfg))
+exports.config = config
 exports.fixtures = require('../fixtures')
 exports.app = (cfg, cb) => mead(cb ? config(cfg) : config(), cb || cfg)
 exports.appify = pify(exports.app)

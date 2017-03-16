@@ -22,22 +22,23 @@ module.exports = (request, response, next) => {
   const metadataResolvers = values(plugins['metadata-resolver'] || {})
   const context = {request, response, urlPath}
 
-  let metadata = null
-  for (let i = 0; !metadata && i < metadataResolvers.length; i++) {
-    metadata = metadataResolvers[i](context)
+  context.metadata = null
+  for (let i = 0; !context.metadata && i < metadataResolvers.length; i++) {
+    context.metadata = metadataResolvers[i](context)
   }
 
   let params = {}
   try {
     params = parameters.fromQueryString(request.query, params, config)
     params = parameters.fromRequest(request, params, config)
-    params = metadata ? finalizeParams(metadata) : params
+    params = context.metadata ? finalizeParams(context.metadata) : params
+    context.parameters = params
   } catch (err) {
     next(err instanceof ValidationError ? Boom.badRequest(err) : err)
     return
   }
 
-  sourceAdapter.getImageStream(urlPath, (err, stream) => {
+  sourceAdapter.getImageStream(context, (err, stream) => {
     if (err) {
       handleError(err)
       return
@@ -49,17 +50,17 @@ module.exports = (request, response, next) => {
       .pipe(imageStream)
       .on('error', handleError)
 
-    const resolveParams = metadata
+    const resolveParams = context.metadata
       ? Promise.resolve(params)
       : resolveMetadataFromImage(imageStream).then(finalizeParams)
 
     resolveParams
-      .then(finalParams => transform(imageStream, finalParams, metadata))
+      .then(finalParams => transform(imageStream, finalParams, context.metadata))
       .catch(handleError)
   })
 
   function transform(imageStream, finalParams) {
-    const transformStream = transformer(imageStream, finalParams, metadata)
+    const transformStream = transformer(imageStream, finalParams, context.metadata)
     transformStream
       .on('info', info => sendHeaders(info, finalParams, response))
       .pipe(response)
@@ -72,7 +73,7 @@ module.exports = (request, response, next) => {
 
   function resolveMetadataFromImage(imageStream) {
     return imageStream.metadata().then(meta => {
-      metadata = meta
+      context.metadata = meta
       return meta
     })
   }
