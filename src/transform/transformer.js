@@ -106,7 +106,7 @@ function resize(tr, params, meta, opts) {
 }
 
 function fit(tr, params, meta) {
-  if (!params.fit) {
+  if (!params.fit || (!params.width && !params.height)) {
     params.outputSize = {width: meta.width, height: meta.height}
     return
   }

@@ -18,6 +18,10 @@ test('[resize] upscales but maintains aspect ratio in clip mode', t => {
   assertSize({mead, query: {w: 600, h: 531, fit: 'clip'}}, {width: 600, height: 400}, t)
 })
 
+test('[resize] ignores resize in clip mode when no w/h given', t => {
+  assertSize({mead, query: {fit: 'clip'}}, {width: 300, height: 200}, t)
+})
+
 /********************
  * CROP MODE        *
  ********************/
@@ -50,6 +54,10 @@ test('[resize] crops to focal point (square)', t => {
   })
 })
 
+test('[resize] ignores resize in crop mode when no w/h given', t => {
+  assertSize({mead, query: {fit: 'crop'}}, {width: 300, height: 200}, t)
+})
+
 /********************
  * FILL MODE        *
  ********************/
@@ -59,6 +67,10 @@ test('[resize] fills to match dimensions in fill mode (target larger than origin
 
 test('[resize] fills to match dimensions in fill mode (target smaller than original)', t => {
   assertSize({mead, query: {w: 180, h: 150, bg: 'ccc', fit: 'fill'}}, {width: 180, height: 150}, t)
+})
+
+test('[resize] ignores resize in fill mode when no w/h given', t => {
+  assertSize({mead, query: {fit: 'fill'}}, {width: 300, height: 200}, t)
 })
 
 /********************
@@ -82,6 +94,10 @@ test('[resize] fills the remainder of the size with background color', t => {
   })
 })
 
+test('[resize] ignores resize in fillmax mode when no w/h given', t => {
+  assertSize({mead, query: {fit: 'fillmax'}}, {width: 300, height: 200}, t)
+})
+
 /********************
  * MAX MODE         *
  ********************/
@@ -91,6 +107,10 @@ test('[resize] resizes to maximum of original size in max mode', t => {
 
 test('[resize] resizes to less than original size in max mode (maintains aspect)', t => {
   assertSize({mead, query: {w: 180, h: 150, fit: 'max'}}, {width: 180, height: 120}, t)
+})
+
+test('[resize] ignores resize in max mode when no w/h given', t => {
+  assertSize({mead, query: {fit: 'max'}}, {width: 300, height: 200}, t)
 })
 
 /********************
@@ -128,6 +148,10 @@ test('[resize] resizes/crops to given aspect ratio, not exceeding original size 
   assertSize({mead, query: {w: 200, h: 180, fit: 'min'}}, {width: 200, height: 180}, t)
 })
 
+test('[resize] ignores resize in min mode when no w/h given', t => {
+  assertSize({mead, query: {fit: 'min'}}, {width: 300, height: 200}, t)
+})
+
 /********************
  * SCALE MODE       *
  ********************/
@@ -137,6 +161,10 @@ test('[resize] always scales to given size in scale mode, ignores aspect ratio (
 
 test('[resize] always scales to given size in scale mode, ignores aspect ratio (#2)', t => {
   assertSize({mead, query: {w: 177, h: 981, fit: 'scale'}}, {width: 177, height: 981}, t)
+})
+
+test('[resize] ignores resize in scale mode when no w/h given', t => {
+  assertSize({mead, query: {fit: 'scale'}}, {width: 300, height: 200}, t)
 })
 
 /********************
