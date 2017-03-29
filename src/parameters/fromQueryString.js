@@ -197,7 +197,7 @@ function ifCrop(validator) {
 function color(param, value) {
   const val = (value || '').toLowerCase()
   if (!/^[a-f0-9]+$/.test(val)) {
-    throw new ValidationError(`Parameter "${param}" must be an unprefix, valid hexadecimal color`)
+    throw new ValidationError(`Parameter "${param}" must be an unprefixed, valid hexadecimal color`)
   }
 
   const formats = ['rgb', 'argb', 'rrggbb', 'aarrggbb']
