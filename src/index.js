@@ -1,5 +1,6 @@
 const path = require('path')
 const Boom = require('boom')
+const sharp = require('sharp')
 const semver = require('semver')
 const values = require('lodash/values')
 const express = require('express')
@@ -44,6 +45,11 @@ function initApp(app, config, callback) {
   } catch (err) {
     callback(err)
     return
+  }
+
+  // Set options for sharp/vips
+  if (config.vips) {
+    sharp.concurrency(config.vips.concurrency || 0)
   }
 
   // Register plugin-based middleware

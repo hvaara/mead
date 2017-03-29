@@ -21,6 +21,10 @@ module.exports = {
     ttl: process.env.NODE_ENV === 'production' ? 86400 : 0,
   },
 
+  vips: {
+    concurrency: 0, // 0 means number of cores
+  },
+
   images: {
     maxSize: 8192,
     forceToFilenameFormat: false,
