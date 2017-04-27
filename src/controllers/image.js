@@ -21,6 +21,9 @@ module.exports = (request, response, next) => {
 
   const metadataResolvers = values(plugins['metadata-resolver'] || {})
   const context = {request, response, urlPath}
+  const pixelLimit = typeof config.vips.limitInputPixels === 'undefined'
+    ? 268402689
+    : config.vips.limitInputPixels
 
   context.metadata = null
   for (let i = 0; !context.metadata && i < metadataResolvers.length; i++) {
@@ -44,7 +47,8 @@ module.exports = (request, response, next) => {
       return
     }
 
-    const imageStream = sharp()
+    const imageStream = sharp().limitInputPixels(pixelLimit)
+
     stream
       .on('error', handleError)
       .pipe(imageStream)
