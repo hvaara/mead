@@ -1,3 +1,4 @@
+/* eslint-disable no-multi-spaces */
 const test = require('tape')
 const constrainSize = require('../src/transform/constrainSize')
 

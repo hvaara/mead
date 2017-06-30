@@ -22,6 +22,20 @@ test('[resize] ignores resize in clip mode when no w/h given', t => {
   assertSize({mead, query: {fit: 'clip'}}, {width: 300, height: 200}, t)
 })
 
+/**********************
+ * CLIP BY DEFAULT    *
+ **********************/
+test('[resize] uses clip fit by default', t => {
+  let done = 0
+  const end = t.end
+  t.end = err => ++done === 4 && end.call(t, err)
+
+  assertSize({mead, query: {w: 256}, fixture: 'mead.png'}, {width: 256, height: 256}, t)
+  assertSize({mead, query: {w: 200, h: 500}}, {width: 200, height: 133}, t)
+  assertSize({mead, query: {w: 600, h: 531}}, {width: 600, height: 400}, t)
+  assertSize({mead, query: {}}, {width: 300, height: 200}, t)
+})
+
 /********************
  * CROP MODE        *
  ********************/

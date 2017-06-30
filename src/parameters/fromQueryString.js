@@ -55,6 +55,7 @@ const queryMap = [
 
 const defaultParameters = {
   dpr: 1,
+  fit: 'clip',
 
   maxWidth: +Infinity,
   minWidth: -Infinity,
