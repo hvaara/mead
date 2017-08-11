@@ -47,12 +47,22 @@ module.exports = (request, response, next) => {
       return
     }
 
+    const isSvg = /\.svg$/i.test(context.urlPath)
+    const isGif = /\.gif$/i.test(context.urlPath)
+    const formatSpecified = params.output && params.output.format
+    const transformUnsupported = (isSvg || isGif) && !formatSpecified
+
     const imageStream = sharp().limitInputPixels(pixelLimit)
+    const dstStream = transformUnsupported ? response : imageStream
 
     stream
       .on('error', handleError)
-      .pipe(imageStream)
+      .pipe(dstStream)
       .on('error', handleError)
+
+    if (dstStream !== imageStream) {
+      return
+    }
 
     const resolveParams = context.metadata
       ? Promise.resolve(params)
