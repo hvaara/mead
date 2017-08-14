@@ -49,7 +49,7 @@ module.exports = (request, response, next) => {
 
     const isSvg = /\.svg$/i.test(context.urlPath)
     const isGif = /\.gif$/i.test(context.urlPath)
-    const formatSpecified = params.output && params.output.format
+    const formatSpecified = request.query.fm
     const transformUnsupported = (isSvg || isGif) && !formatSpecified
 
     const imageStream = sharp().limitInputPixels(pixelLimit)
