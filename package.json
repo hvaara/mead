@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/rexxars/mead#readme",
   "devDependencies": {
-    "eslint": "^4.1.1",
+    "eslint": "^4.5.0",
     "eslint-config-bengler": "^3.1.4",
     "faucet": "0.0.1",
     "get-pixels": "^3.3.0",
@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "boom": "^5.2.0",
-    "color": "^1.0.3",
+    "color": "^2.0.0",
     "express": "^4.15.4",
     "fastseries": "^1.7.2",
     "lodash": "^4.17.4",
@@ -57,6 +57,6 @@
     "semver": "^5.4.1",
     "serve-favicon": "^2.4.3",
     "sharp": "^0.18.2",
-    "yargs": "^7.0.2"
+    "yargs": "^8.0.2"
   }
 }

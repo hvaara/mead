@@ -37,6 +37,14 @@ test('[transforms] pad image', t => {
   })
 })
 
+test('[transforms] pad image with alpha color', t => {
+  readImage('mead.png?bg=0fff&pad=10').then(img => {
+    t.equal(img.width, 532, 'correct width')
+    t.equal(img.height, 532, 'correct height')
+    t.end()
+  }).catch(t.end)
+})
+
 test('[transforms] pad image combined with width adjustment', t => {
   readImage('mead.png?bg=bf1942&pad=10&w=256').then(img => {
     t.equal(img.width, 256, 'correct width')
