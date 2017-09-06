@@ -794,6 +794,12 @@ eslint-config-bengler@^3.1.4:
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/eslint-config-bengler/-/eslint-config-bengler-3.1.4.tgz#ea8ab4f41d4f984c261b2338e8780aa989c4b0bf"
 
+eslint-config-sanity@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/eslint-config-sanity/-/eslint-config-sanity-2.1.4.tgz#ddbd8129713230f6cba8096f880b3128372020e6"
+  dependencies:
+    eslint-config-bengler "^3.1.4"
+
 eslint-scope@^3.7.1:
   version "3.7.1"
   resolved "https://registry.yarnpkg.com/eslint-scope/-/eslint-scope-3.7.1.tgz#3d63c3edfda02e06e01a452ad88caacc7cdcb6e8"
