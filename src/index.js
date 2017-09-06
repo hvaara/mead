@@ -8,6 +8,7 @@ const favicon = require('serve-favicon')
 const errorHandler = require('./middleware/errorHandler')
 const sourceResolver = require('./middleware/sourceResolver')
 const sourceAdapterLoader = require('./middleware/sourceAdapterLoader')
+const fromQueryString = require('./parameters/fromQueryString')
 const loadPlugins = require('./loadPlugins')
 const pkg = require('../package.json')
 
@@ -23,6 +24,7 @@ module.exports = (config, callback) => {
   app.disable('x-powered-by')
   app.set('trust proxy', config.trustProxy)
 
+  app.locals.knownQueryParams = fromQueryString.knowParameters
   app.locals.plugins = loadPlugins(app, err => {
     if (err) {
       callback(err)

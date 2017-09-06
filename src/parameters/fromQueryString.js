@@ -283,4 +283,6 @@ function crop(values) {
   }
 }
 
+mapQueryParameters.knowParameters = queryMap.map(item => item[0])
+
 module.exports = mapQueryParameters
