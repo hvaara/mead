@@ -41,7 +41,7 @@ module.exports = (request, response, next) => {
     return
   }
 
-  sourceAdapter.getImageStream(context, (err, stream) => {
+  sourceAdapter.getImageStream(context, async (err, stream) => {
     if (err) {
       handleError(err)
       return
@@ -52,37 +52,49 @@ module.exports = (request, response, next) => {
     const formatSpecified = request.query.fm
     const transformUnsupported = (isSvg || isGif) && !formatSpecified
 
-    const imageStream = sharp().limitInputPixels(pixelLimit)
-    const dstStream = transformUnsupported ? response : imageStream
-
-    stream
-      .on('error', handleError)
-      .pipe(dstStream)
-      .on('error', handleError)
-
-    if (dstStream !== imageStream) {
+    if (transformUnsupported) {
+      passthrough(stream)
       return
     }
 
-    const resolveParams = context.metadata
-      ? Promise.resolve(params)
-      : resolveMetadataFromImage(imageStream).then(finalizeParams)
+    const imageStream = sharp().limitInputPixels(pixelLimit)
 
-    resolveParams
-      .then(finalParams => transform(imageStream, finalParams, context.metadata))
-      .catch(handleError)
+    stream
+      .on('error', handleError)
+      .pipe(imageStream)
+      .on('error', handleError)
+
+    try {
+      let finalParams
+      if (context.metadata) {
+        finalParams = await params
+      } else {
+        const fromImage = await resolveMetadataFromImage(imageStream)
+        finalParams = await finalizeParams(fromImage)
+      }
+
+      const image = transformer(imageStream, finalParams, context.metadata)
+      const transformed = await image.toBuffer({
+        resolveWithObject: true
+      })
+
+      sendHeaders(transformed.info, finalParams, response)
+      response.end(transformed.data)
+    } catch (transformErr) {
+      handleError(transformErr)
+    }
   })
 
-  function transform(imageStream, finalParams) {
-    const transformStream = transformer(imageStream, finalParams, context.metadata)
-    transformStream
-      .on('info', info => sendHeaders(info, finalParams, response))
+  function passthrough(imageStream) {
+    imageStream
+      .on('error', handleError)
       .pipe(response)
       .on('error', handleError)
   }
 
   function finalizeParams(meta) {
-    return parameters.finalize(parameters.fromMetadata(params, meta, config))
+    const fromMeta = parameters.fromMetadata(params, meta, config)
+    return parameters.finalize(fromMeta)
   }
 
   function resolveMetadataFromImage(imageStream) {

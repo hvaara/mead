@@ -3,11 +3,14 @@
     "node": true,
     "es6": true
   },
-  "extends": "bengler",
+  "extends": "sanity",
   "rules": {
     "prefer-rest-params": 0,
     "guard-for-in": 0,
     "no-cond-assign": 0,
     "complexity": ["warn", {"max": 10}]
+  },
+  "parserOptions": {
+    "ecmaVersion": 2017
   }
 }
