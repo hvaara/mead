@@ -3,6 +3,7 @@ const sharp = require('sharp')
 const values = require('lodash/values')
 const parameters = require('../parameters')
 const transformer = require('../transform/transformer')
+const callMiddlewares = require('../callMiddlewares')
 const errorTransformer = require('../transform/errorTransformer')
 const ValidationError = require('../errors/validationError')
 
@@ -19,6 +20,7 @@ module.exports = (request, response, next) => {
   const {config, plugins} = request.app.locals
   const urlPath = request.params['0']
 
+  const responseHandlers = values(plugins['response-handler'] || {})
   const metadataResolvers = values(plugins['metadata-resolver'] || {})
   const context = {request, response, urlPath}
   const pixelLimit = typeof config.vips.limitInputPixels === 'undefined'
@@ -78,8 +80,16 @@ module.exports = (request, response, next) => {
         resolveWithObject: true
       })
 
-      sendHeaders(transformed.info, finalParams, response)
-      response.end(transformed.data)
+      callMiddlewares(responseHandlers, {
+        request,
+        response,
+        urlPath,
+        headers: getHeaders(transformed.info, finalParams, response),
+        data: transformed.data,
+        info: transformed.info,
+      })
+
+      // plugins responseHandlers
     } catch (transformErr) {
       handleError(transformErr)
     }
@@ -109,34 +119,38 @@ module.exports = (request, response, next) => {
   }
 }
 
-function sendHeaders(info, params, response) {
+function getHeaders(info, params, response) {
+  const headers = {}
+
   // Security
-  response.setHeader('X-Content-Type-Options', 'nosniff')
+  headers['X-Content-Type-Options'] = 'nosniff'
 
   // Content type
   const mimeType = info.format && mimeTypes[info.format]
-  response.setHeader('Content-Type', mimeType || 'application/octet-stream')
+  headers['Content-Type'] = mimeType || 'application/octet-stream'
 
   // Cache settings
   const cache = response.locals.source.cache || {}
   if (cache.ttl) {
     const ttl = cache.ttl | 0 // eslint-disable-line no-bitwise
-    response.setHeader('Cache-Control', `public, max-age=${ttl}`)
+    headers['Cache-Control'] = `public, max-age=${ttl}`
   }
 
   // Download?
   if (typeof params.download !== 'undefined') {
     const name = `"${encodeURIComponent(params.download || '')}"`
-    response.setHeader('Content-Disposition', `attachment;filename=${name}`)
+    headers['Content-Disposition'] = `attachment;filename=${name}`
   }
 
   // Parameter-based headers
   const paramHeaders = params.responseHeaders || {}
   Object.keys(paramHeaders).forEach(header => {
     const value = paramHeaders[header]
-    response.setHeader(header, Array.isArray(value) ? value.join(',') : value)
+    headers[header] = Array.isArray(value) ? value.join(',') : value
   })
 
   // Shameless promotion
-  response.setHeader('X-Powered-By', 'mead.science')
+  headers['X-Powered-By'] = 'mead.science'
+
+  return headers
 }

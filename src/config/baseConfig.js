@@ -4,6 +4,7 @@ const fsSource = require('mead-plugin-source-fs')
 const proxySource = require('mead-plugin-source-proxy')
 const webfolderSource = require('mead-plugin-source-webfolder')
 const configSourceResolver = require('mead-plugin-source-resolver-config')
+const imageResponseHandler = require('../plugins/imageResponseHandler')
 
 module.exports = {
   sources: [],
@@ -14,7 +15,8 @@ module.exports = {
     configSourceResolver,
     fsSource,
     proxySource,
-    webfolderSource
+    webfolderSource,
+    imageResponseHandler
   ],
 
   cache: {

@@ -43,7 +43,7 @@ module.exports = (config = {}) => {
     userConfig,
     (objValue, srcValue) => {
       return Array.isArray(objValue)
-        ? objValue.concat(srcValue)
+        ? srcValue.concat(objValue)
         : undefined
     }
   )
