@@ -85,7 +85,7 @@ module.exports = (request, response, next) => {
         response,
         urlPath,
         headers: getHeaders(transformed.info, finalParams, response),
-        data: transformed.data,
+        body: transformed.data,
         info: transformed.info,
       })
 
