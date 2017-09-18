@@ -47,6 +47,7 @@
     "color": "^2.0.0",
     "express": "^4.15.4",
     "fastseries": "^1.7.2",
+    "get-stream": "^3.0.0",
     "lodash": "^4.17.4",
     "mead-plugin-signature-md5": "^1.0.0",
     "mead-plugin-source-fs": "^2.0.0",

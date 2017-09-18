@@ -1,6 +1,7 @@
 const Boom = require('boom')
 const sharp = require('sharp')
 const values = require('lodash/values')
+const getStream = require('get-stream')
 const parameters = require('../parameters')
 const transformer = require('../transform/transformer')
 const callMiddlewares = require('../callMiddlewares')
@@ -59,12 +60,15 @@ module.exports = (request, response, next) => {
       return
     }
 
-    const imageStream = sharp().limitInputPixels(pixelLimit)
+    let imageBuffer
+    try {
+      imageBuffer = await getStream.buffer(stream)
+    } catch (readErr) {
+      handleError(readErr)
+      return
+    }
 
-    stream
-      .on('error', handleError)
-      .pipe(imageStream)
-      .on('error', handleError)
+    const imageStream = sharp(imageBuffer).limitInputPixels(pixelLimit)
 
     try {
       let finalParams
@@ -88,8 +92,6 @@ module.exports = (request, response, next) => {
         body: transformed.data,
         info: transformed.info,
       })
-
-      // plugins responseHandlers
     } catch (transformErr) {
       handleError(transformErr)
     }
