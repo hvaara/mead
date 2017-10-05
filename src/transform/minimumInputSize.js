@@ -59,7 +59,7 @@ function fitFillMax(params, meta) {
 }
 
 function fitCrop(params, meta) {
-  return fitClip(params, meta)
+  return getOutputSize(params, meta, {sizeMode: 'crop'})
 }
 
 function fitMin(params, meta) {
