@@ -3,6 +3,9 @@ const {appify, assertSize, readImage} = require('./helpers')
 
 const mead = appify()
 
+// eslint-disable-next-line no-console
+test.skip = testName => console.log(`# Skipped: ${testName}`)
+
 /********************
  * CLIP MODE        *
  ********************/
@@ -230,6 +233,23 @@ test('[resize] max height does nothing if fit is not "crop"', t => {
   assertSize(
     {mead, query: {'max-h': 400, w: 800}, fixture: 'landscape.png'},
     {width: 800, height: 405}, t
+  )
+})
+
+/**********************
+ * SHRINK TO ZERO     *
+ **********************/
+test.skip('[resize] will not shrink images to below 1px in height', t => {
+  assertSize(
+    {mead, query: {w: 100}, fixture: '2000x4.png'},
+    {width: 100, height: 1}, t
+  )
+})
+
+test.skip('[resize] will not shrink images to below 1px in width', t => {
+  assertSize(
+    {mead, query: {h: 100}, fixture: '4x2000.png'},
+    {height: 100, width: 1}, t
   )
 })
 
