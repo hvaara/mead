@@ -107,11 +107,9 @@ module.exports = (request, response, next) => {
     return parameters.finalize(fromMeta)
   }
 
-  function resolveMetadataFromImage(imageStream) {
-    return imageStream.metadata().then(meta => {
-      context.metadata = meta
-      return meta
-    })
+  async function resolveMetadataFromImage(imageStream) {
+    context.metadata = await imageStream.metadata()
+    return context.metadata
   }
 
   function handleError(err) {
