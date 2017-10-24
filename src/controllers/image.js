@@ -1,4 +1,5 @@
 const Boom = require('boom')
+const pump = require('pump')
 const sharp = require('sharp')
 const values = require('lodash/values')
 const getStream = require('get-stream')
@@ -98,10 +99,7 @@ module.exports = (request, response, next) => {
   })
 
   function passthrough(imageStream) {
-    imageStream
-      .on('error', handleError)
-      .pipe(response)
-      .on('error', handleError)
+    pump(imageStream, response, handleError)
   }
 
   function finalizeParams(meta) {
@@ -117,6 +115,10 @@ module.exports = (request, response, next) => {
   }
 
   function handleError(err) {
+    if (!err) {
+      return
+    }
+
     next(errorTransformer(err))
   }
 }

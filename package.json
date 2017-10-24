@@ -54,6 +54,7 @@
     "mead-plugin-source-proxy": "^2.0.0",
     "mead-plugin-source-resolver-config": "^1.0.0",
     "mead-plugin-source-webfolder": "^1.0.0",
+    "pump": "^1.0.2",
     "responsive-callback": "^1.0.1",
     "semver": "^5.4.1",
     "serve-favicon": "^2.4.3",
