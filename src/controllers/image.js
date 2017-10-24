@@ -25,9 +25,7 @@ module.exports = (request, response, next) => {
   const responseHandlers = values(plugins['response-handler'] || {})
   const metadataResolvers = values(plugins['metadata-resolver'] || {})
   const context = {request, response, urlPath}
-  const pixelLimit = typeof config.vips.limitInputPixels === 'undefined'
-    ? 268402689
-    : config.vips.limitInputPixels
+  const pixelLimit = typeof config.vips.limitInputPixels === 'undefined' ? 268402689 : config.vips.limitInputPixels
 
   context.metadata = null
   for (let i = 0; !context.metadata && i < metadataResolvers.length; i++) {
@@ -91,7 +89,7 @@ module.exports = (request, response, next) => {
         urlPath,
         headers: getHeaders(transformed.info, finalParams, response),
         body: transformed.data,
-        info: transformed.info,
+        info: transformed.info
       })
     } catch (transformErr) {
       handleError(transformErr)
@@ -113,7 +111,9 @@ module.exports = (request, response, next) => {
   }
 
   function handleError(err) {
-    if (!err) {
+    // If upstream closed our connection prematurely, don't treat that as an error
+    // Error is emitted from `end-of-stream` (dependency of `pump`).
+    if (!err || err.message.includes('premature close')) {
       return
     }
 
