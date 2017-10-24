@@ -6,9 +6,11 @@ module.exports = (err, req, res, next) => {
   const error = err.isBoom ? err : Boom.wrap(err)
   const isProduction = process.env.NODE_ENV === 'production'
 
-  res
-    .status(error.output.statusCode)
-    .send(error.output.payload)
+  if (!res.headersSent) {
+    res
+      .status(error.output.statusCode)
+      .send(error.output.payload)
+  }
 
   /**
    * If we're not in production, pass errors on to be logged
