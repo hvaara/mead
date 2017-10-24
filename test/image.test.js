@@ -141,14 +141,16 @@ test('[image] sends content-disposition if download flag is set', t => {
 })
 
 test('[image] sends correct cache-control when ttl is set on source', t => {
-  const sources = [{
-    name: 'foo',
-    cache: {ttl: 3600},
-    adapter: {
-      type: 'fs',
-      config: {basePath: path.join(__dirname, 'fixtures')}
+  const sources = [
+    {
+      name: 'foo',
+      cache: {ttl: 3600},
+      adapter: {
+        type: 'fs',
+        config: {basePath: path.join(__dirname, 'fixtures')}
+      }
     }
-  }]
+  ]
 
   app({sources}, (err, mead) => {
     t.ifError(err, 'no error on boot')

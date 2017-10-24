@@ -8,15 +8,17 @@ const request = require('supertest')
 const getPixels = require('get-pixels')
 const mead = require('../..')
 const getConfig = require('../../src/config')
-const sources = [{
-  name: 'foo',
-  adapter: {
-    type: 'fs',
-    config: {
-      basePath: path.join(__dirname, '..', 'fixtures')
+const sources = [
+  {
+    name: 'foo',
+    adapter: {
+      type: 'fs',
+      config: {
+        basePath: path.join(__dirname, '..', 'fixtures')
+      }
     }
   }
-}]
+]
 
 const config = (cfg = {}) => getConfig(Object.assign({sources}, cfg))
 exports.config = config

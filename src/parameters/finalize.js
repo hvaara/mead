@@ -1,6 +1,4 @@
-const pipeline = [
-  applyDpr
-]
+const pipeline = [applyDpr]
 
 module.exports = params => {
   pipeline.forEach(operation => operation(params))

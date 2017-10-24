@@ -5,11 +5,13 @@ const {app, assertImageMeta} = require('./helpers')
 
 test('[metadata-resolve] plugins allows overriding metadata resolving', t => {
   app({
-    plugins: [{
-      name: 'mock-meta',
-      type: 'metadata-resolver',
-      handler: mockResolve
-    }]
+    plugins: [
+      {
+        name: 'mock-meta',
+        type: 'metadata-resolver',
+        handler: mockResolve
+      }
+    ]
   }, (err, mead) => {
     t.ifError(err, 'no error')
     request(mead)
