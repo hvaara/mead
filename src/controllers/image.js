@@ -83,6 +83,10 @@ module.exports = (request, response, next) => {
         resolveWithObject: true
       })
 
+      if (!transformed || !transformed.info) {
+        throw Boom.unsupportedMediaType('Invalid image data')
+      }
+
       callMiddlewares(responseHandlers, {
         request,
         response,
