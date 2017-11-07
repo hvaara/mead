@@ -1,16 +1,33 @@
 const getOutputSize = require('./outputSize')
 
 module.exports = function minimumInputSize(params, meta) {
-  let minimum = {width: meta.width, height: meta.height}
+  // The dimensions of the full image
+  const full = {width: meta.width, height: meta.height}
 
-  if (params.width || params.height) {
-    minimum = min(
-      minimum,
-      params.fit ? fromFit(params, meta) : fromResize(params, meta)
-    )
+  // If we are doing no size limiting, that's our answer right there
+  if (!params.width && !params.height) {
+    return full
   }
 
-  return minimum
+  // Assume the user want it all
+  let source = full
+
+  // Oh, she didn't. She selected a subset rectangle
+  if (params.sourceRectangle) {
+    const [,, width, height] = params.sourceRectangle
+    source = {width, height}
+  }
+
+  // Compute the fit
+  const out = params.fit ? fromFit(params, source) : fitClip(params, source)
+
+  // Compute the actual source image size
+  const minimum = {
+    width: Math.round(full.width / out.xFactor),
+    height: Math.round(full.height / out.yFactor)
+  }
+
+  return min(full, minimum)
 }
 
 const fitHandlers = {
@@ -66,6 +83,6 @@ function fitMin(params, meta) {
   return getOutputSize(params, meta, {sizeMode: 'simple'})
 }
 
-function fromResize(params, meta) {
-  return getOutputSize(params, meta, {sizeMode: 'simple'})
-}
+// function fromResize(params, meta) {
+//   return getOutputSize(params, meta, {sizeMode: 'simple'})
+// }
