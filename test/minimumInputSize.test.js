@@ -123,6 +123,37 @@ const tests = [
     params: {height: 200, width: 160, fit: 'clip'},
     expected: {width: 160, height: 160}
   },
+  {
+    name: 'rect + width',
+    meta: {width: 1200, height: 2400},
+    params: {sourceRectangle: [200, 200, 600, 600], width: 300},
+    expected: {width: 600, height: 1200}
+  },
+  {
+    name: 'rect + width, upscaling',
+    meta: {width: 120, height: 240},
+    params: {sourceRectangle: [20, 20, 12, 12], width: 300},
+    expected: {width: 120, height: 240}
+  },
+  {
+    name: 'rect + width, wide',
+    meta: {width: 1200, height: 2400},
+    params: {sourceRectangle: [20, 20, 400, 200], width: 300},
+    expected: {width: 900, height: 1800}
+  },
+  {
+    name: 'rect + width, tall',
+    meta: {width: 1200, height: 2400},
+    params: {sourceRectangle: [20, 20, 300, 400], width: 300},
+    expected: {width: 1200, height: 2400}
+  },
+  {
+    name: 'fit: crop, resize: square, landscape input',
+    meta: {width: 1024, height: 341},
+    params: {sourceRectangle: [20, 20, 320, 320], height: 160, width: 160, fit: 'crop'},
+    expected: {width: 512, height: 171}
+  },
+
 ]
 
 // @todo add more tests for different fits
