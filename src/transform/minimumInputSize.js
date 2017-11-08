@@ -82,7 +82,3 @@ function fitCrop(params, meta) {
 function fitMin(params, meta) {
   return getOutputSize(params, meta, {sizeMode: 'simple'})
 }
-
-// function fromResize(params, meta) {
-//   return getOutputSize(params, meta, {sizeMode: 'simple'})
-// }
