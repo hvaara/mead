@@ -55,7 +55,8 @@ module.exports = (request, response, next) => {
     const transformUnsupported = (isSvg || isGif) && !formatSpecified
 
     if (transformUnsupported) {
-      passthrough(stream)
+      const finalParams = await params
+      passthrough(stream, getHeaders({format: isSvg ? 'svg' : 'gif'}, finalParams, response))
       return
     }
 
@@ -100,7 +101,8 @@ module.exports = (request, response, next) => {
     }
   })
 
-  function passthrough(imageStream) {
+  function passthrough(imageStream, headers) {
+    response.set(headers)
     pump(imageStream, response, handleError)
   }
 
