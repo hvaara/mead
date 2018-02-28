@@ -23,7 +23,7 @@ test('[transforms] border image with alpha (inlaid)', t => {
   readImage('mead.png?border=10,ccbf1942').then(img => {
     t.equal(img.width, 512, 'correct width')
     t.equal(img.height, 512, 'correct height')
-    t.equal(img.colorAt(0, 0), 'bf1942', 'correct color')
+    t.equal(img.colorAt(0, 0), 'be1841', 'correct color')
     t.end()
   })
 })
@@ -38,11 +38,13 @@ test('[transforms] pad image', t => {
 })
 
 test('[transforms] pad image with alpha color', t => {
-  readImage('mead.png?bg=0fff&pad=10').then(img => {
-    t.equal(img.width, 532, 'correct width')
-    t.equal(img.height, 532, 'correct height')
-    t.end()
-  }).catch(t.end)
+  readImage('mead.png?bg=0fff&pad=10')
+    .then(img => {
+      t.equal(img.width, 532, 'correct width')
+      t.equal(img.height, 532, 'correct height')
+      t.end()
+    })
+    .catch(t.end)
 })
 
 test('[transforms] pad image combined with width adjustment', t => {

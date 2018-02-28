@@ -50,7 +50,7 @@ const queryMap = [
   ['fp-debug', 'focalPointTarget', presenceBool],
 
   // Meta/header stuff
-  ['dl', 'download', identity],
+  ['dl', 'download', identity]
 ]
 
 const defaultParameters = {
@@ -75,20 +75,23 @@ function mapQueryParameters(queryString, parameters = {}) {
     return params
   }, parameters)
 
-  return defaults(queryMap.reduce((params, param) => {
-    const [qParam, name, ...validators] = param
-    if (isUndefined(qs[qParam])) {
+  return defaults(
+    queryMap.reduce((params, param) => {
+      const [qParam, name, ...validators] = param
+      if (isUndefined(qs[qParam])) {
+        return params
+      }
+
+      const value = validators.reduce(
+        (result, validator) => validator(qParam, result, params, qs),
+        qs[qParam]
+      )
+
+      params[name] = value
       return params
-    }
-
-    const value = validators.reduce(
-      (result, validator) => validator(qParam, result, params, qs),
-      qs[qParam]
-    )
-
-    params[name] = value
-    return params
-  }, {}), cloneDeep(defaultParameters))
+    }, {}),
+    cloneDeep(defaultParameters)
+  )
 }
 
 function split(param, input) {
@@ -162,7 +165,9 @@ function intBetween(min, max) {
 function ints(expectedLength) {
   return (param, input) => {
     if (input.length !== expectedLength) {
-      throw new ValidationError(`Parameter "${param}" takes ${expectedLength} integers in x,y,w,h format`)
+      throw new ValidationError(
+        `Parameter "${param}" takes ${expectedLength} integers in x,y,w,h format`
+      )
     }
 
     return input.map((val, i) => int(`${param}[${i}]`, val))
@@ -175,7 +180,8 @@ function getOneOf(values) {
 
 function enumz(values) {
   return (param, value) => {
-    (Array.isArray(value) ? value : [value]).forEach(val => {
+    const vals = Array.isArray(value) ? value : [value]
+    vals.forEach(val => {
       if (!values.includes(val)) {
         throw new ValidationError(`Parameter "${param}" - ${getOneOf(values)}`)
       }
@@ -204,9 +210,9 @@ function color(param, value) {
   const formats = ['rgb', 'argb', 'rrggbb', 'aarrggbb']
   const allowed = [3, 4, 6, 8]
   if (!allowed.includes(val.length)) {
+    const strFormats = formats.join(', ')
     throw new ValidationError(
-      `Parameter "${param}" must be a valid hexadecimal color.\n`
-      + `Allowed formats: ${formats.join(', ')}`
+      `Parameter "${param}" must be a valid hexadecimal color.\nAllowed formats: ${strFormats}`
     )
   }
 
@@ -220,7 +226,12 @@ function color(param, value) {
   const alp = val.substr(0, al)
   const base = val.substr(al)
   const alpha = alp.length === 1 ? alp[0] + alp[0] : alp
-  return Color(`#${base}`).alpha(parseInt(alpha, 16) / 255).rgb()
+  const tmp = Color(`#${base}`)
+    .alpha(parseInt(alpha, 16) / 255)
+    .rgb()
+
+  const [r, g, b] = tmp.color
+  return {r, g, b, alpha: tmp.valpha}
 }
 
 function quote(str) {
@@ -268,7 +279,9 @@ function crop(values) {
 
   function mapPositional(val) {
     if (!values.includes(val)) {
-      throw new ValidationError(`Value "${val}" not recognized for parameter "crop", ${getOneOf(values)}`)
+      throw new ValidationError(
+        `Value "${val}" not recognized for parameter "crop", ${getOneOf(values)}`
+      )
     }
 
     return cropPositionMap[val] || false
