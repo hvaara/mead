@@ -1,84 +1,83 @@
-const test = require('tape')
 const mead = require('..')
 const {fixtures, config} = require('./helpers')
 
-test('[boot] errors if no sourceResolver is set', t => {
+test('[boot] errors if no sourceResolver is set', done => {
   mead({}, err => {
-    t.instanceOf(err, Error)
-    t.include(err.message, 'sourceResolver')
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toContain('sourceResolver')
+    done()
   })
 })
 
-test('[boot] errors if plugin fails to register', t => {
+test('[boot] errors if plugin fails to register', done => {
   mead({plugins: [fixtures.plugin({registerError: true})]}, err => {
-    t.instanceOf(err, Error)
-    t.equal(err.message, 'some error')
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toBe('some error')
+    done()
   })
 })
 
-test('[boot] errors if defined sourceResolver is not found', t => {
+test('[boot] errors if defined sourceResolver is not found', done => {
   mead({sourceResolver: 'foo'}, err => {
-    t.instanceOf(err, Error)
-    t.include(err.message, '"foo" not found')
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toContain('"foo" not found')
+    done()
   })
 })
 
-test('[boot] errors on duplicate plugin names within same type', t => {
+test('[boot] errors on duplicate plugin names within same type', done => {
   mead({plugins: [fixtures.plugin(), fixtures.plugin()]}, err => {
-    t.instanceOf(err, Error)
-    t.include(err.message, 'unique within a type')
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toContain('unique within a type')
+    done()
   })
 })
 
-test('[boot] default config should error because of missing sources', t => {
+test('[boot] default config should error because of missing sources', done => {
   mead(config({sources: []}), err => {
-    t.instanceOf(err, Error)
-    t.include(err.message, 'No sources configured')
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toContain('No sources configured')
+    done()
   })
 })
 
-test('[boot] errors on plugins without a name', t => {
+test('[boot] errors on plugins without a name', done => {
   mead(config({plugins: [fixtures.plugin({name: ''})]}), err => {
-    t.instanceOf(err, Error)
-    t.include(err.message, "'name'-property")
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toContain("'name'-property")
+    done()
   })
 })
 
-test('[boot] errors on plugins without a type', t => {
+test('[boot] errors on plugins without a type', done => {
   mead(config({plugins: [fixtures.plugin({type: ''})]}), err => {
-    t.instanceOf(err, Error)
-    t.include(err.message, "'type'-property")
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toContain("'type'-property")
+    done()
   })
 })
 
-test('[boot] errors on plugins without a handler', t => {
+test('[boot] errors on plugins without a handler', done => {
   mead(config({plugins: [fixtures.plugin({handler: ''})]}), err => {
-    t.instanceOf(err, Error)
-    t.include(err.message, "'handler'-property")
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toContain("'handler'-property")
+    done()
   })
 })
 
-test('[boot] errors on plugins with a non-function handler', t => {
+test('[boot] errors on plugins with a non-function handler', done => {
   mead(config({plugins: [fixtures.plugin({handler: 'foo'})]}), err => {
-    t.instanceOf(err, Error)
-    t.include(err.message, 'not a function')
-    t.end()
+    expect(err).toBeInstanceOf(Error)
+    expect(err.message).toContain('not a function')
+    done()
   })
 })
 
-test('[boot] given a source, default config should yield app', t => {
+test('[boot] given a source, default config should yield app', done => {
   mead(config({sources: [{name: 'foo', adapter: {type: 'proxy'}}]}), (err, app) => {
-    t.ifError(err, 'no error')
-    t.isFunction(app.listen)
-    t.end()
+    expect(err).toBeFalsy()
+    expect(typeof app.listen).toBe('function')
+    done()
   })
 })
 

@@ -1,146 +1,145 @@
 const path = require('path')
-const test = require('tape')
 const request = require('supertest')
 const {app, assertImageMeta} = require('./helpers')
 
-test('[image] 404s on root source path', t => {
+test('[image] 404s on root source path', done => {
   app((err, mead) => {
-    t.ifError(err)
-    request(mead).get('/foo').expect(404, t.end)
+    expect(err).toBeFalsy()
+    request(mead).get('/foo').expect(404, done)
   })
 })
 
-test('[image] 404s on root source path (alt)', t => {
+test('[image] 404s on root source path (alt)', done => {
   app((err, mead) => {
-    t.ifError(err)
-    request(mead).get('/foo/').expect(404, t.end)
+    expect(err).toBeFalsy()
+    request(mead).get('/foo/').expect(404, done)
   })
 })
 
-test('[image] image route serves plain image without transformations', t => {
+test('[image] image route serves plain image without transformations', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/mead.png')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        assertImageMeta(res, {width: 512, height: 512}, t)
+        expect(reqErr).toBeFalsy()
+        assertImageMeta(res, {width: 512, height: 512}, done)
       })
   })
 })
 
-test('[image] image route serves image with orientation transformation', t => {
+test('[image] image route serves image with orientation transformation', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/320x180.png?or=90')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        assertImageMeta(res, {width: 180, height: 320}, t)
+        expect(reqErr).toBeFalsy()
+        assertImageMeta(res, {width: 180, height: 320}, done)
       })
   })
 })
 
-test('[image] image route serves image with flip transformation (hv)', t => {
+test('[image] image route serves image with flip transformation (hv)', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/320x180.png?flip=hv')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        assertImageMeta(res, {width: 320, height: 180}, t)
+        expect(reqErr).toBeFalsy()
+        assertImageMeta(res, {width: 320, height: 180}, done)
       })
   })
 })
 
-test('[image] image route serves image with format change', t => {
+test('[image] image route serves image with format change', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/320x180.png?fm=jpg')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        assertImageMeta(res, {width: 320, height: 180, format: 'jpeg'}, t)
+        expect(reqErr).toBeFalsy()
+        assertImageMeta(res, {width: 320, height: 180, format: 'jpeg'}, done)
       })
   })
 })
 
-test('[image] image route serves image as progressive jpeg', t => {
+test('[image] image route serves image as progressive jpeg', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/320x180.png?fm=pjpg')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        assertImageMeta(res, {width: 320, height: 180, format: 'jpeg'}, t)
+        expect(reqErr).toBeFalsy()
+        assertImageMeta(res, {width: 320, height: 180, format: 'jpeg'}, done)
       })
   })
 })
 
-test('[image] image route can be told to serve unsupported output formats as different format', t => {
+test('[image] image route can be told to serve unsupported output formats as different format', done => {
   const inputFormatMap = {tiff: 'jpeg'}
   app({inputFormatMap}, (err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/tiff.tiff')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        assertImageMeta(res, {width: 100, height: 66, format: 'jpeg'}, t)
+        expect(reqErr).toBeFalsy()
+        assertImageMeta(res, {width: 100, height: 66, format: 'jpeg'}, done)
       })
   })
 })
 
-test('[image] image route serves image with flip transformation (h)', t => {
+test('[image] image route serves image with flip transformation (h)', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
-    request(mead).get('/foo/images/320x180.png?flip=h').expect(200, t.end)
+    expect(err).toBeFalsy()
+    request(mead).get('/foo/images/320x180.png?flip=h').expect(200, done)
   })
 })
 
-test('[image] image route serves image with flip transformation (v)', t => {
+test('[image] image route serves image with flip transformation (v)', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
-    request(mead).get('/foo/images/320x180.png?flip=v').expect(200, t.end)
+    expect(err).toBeFalsy()
+    request(mead).get('/foo/images/320x180.png?flip=v').expect(200, done)
   })
 })
 
-test('[image] 400s on invalid transformation params', t => {
+test('[image] 400s on invalid transformation params', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/mead.png?w=foo')
       .expect('Content-Type', /json/)
-      .expect(400, t.end)
+      .expect(400, done)
   })
 })
 
-test('[image] 400s on invalid source rectangle coordinates', t => {
+test('[image] 400s on invalid source rectangle coordinates', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/mead.png?rect=256,256,512,512')
       .expect('Content-Type', /json/)
-      .expect(400, t.end)
+      .expect(400, done)
   })
 })
 
-test('[image] sends content-disposition if download flag is set', t => {
+test('[image] sends content-disposition if download flag is set', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/mead.png?w=256&dl=gjøk.png')
       .expect('Content-Disposition', 'attachment;filename="gj%C3%B8k.png"')
-      .expect(200, t.end)
+      .expect(200, done)
   })
 })
 
-test('[image] sends correct cache-control when ttl is set on source', t => {
+test('[image] sends correct cache-control when ttl is set on source', done => {
   const sources = [
     {
       name: 'foo',
@@ -153,24 +152,24 @@ test('[image] sends correct cache-control when ttl is set on source', t => {
   ]
 
   app({sources}, (err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/mead.png')
       .expect('Cache-Control', /max-age=3600/)
-      .expect(200, t.end)
+      .expect(200, done)
   })
 })
 
-test('[image] sends 415 on broken images', t => {
+test('[image] sends 415 on broken images', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
-    request(mead).get('/foo/images/broken-image.jpg').expect(415, t.end)
+    expect(err).toBeFalsy()
+    request(mead).get('/foo/images/broken-image.jpg').expect(415, done)
   })
 })
 
-test('[image] sends 415 on broken images (alt)', t => {
+test('[image] sends 415 on broken images (alt)', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
-    request(mead).get('/foo/images/slightly-broken-image.png').expect(415, t.end)
+    expect(err).toBeFalsy()
+    request(mead).get('/foo/images/slightly-broken-image.png').expect(415, done)
   })
 })

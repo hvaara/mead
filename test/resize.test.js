@@ -1,4 +1,3 @@
-const test = require('tape')
 const {appify, assertSize, readImage} = require('./helpers')
 
 const mead = appify()
@@ -9,247 +8,246 @@ test.skip = testName => console.log(`# Skipped: ${testName}`)
 /********************
  * CLIP MODE        *
  ********************/
-test('[resize] maintains aspect ratio by default', t => {
-  assertSize({mead, query: {w: 256}, fixture: 'mead.png'}, {width: 256, height: 256}, t)
+test('[resize] maintains aspect ratio by default', done => {
+  assertSize({mead, query: {w: 256}, fixture: 'mead.png'}, {width: 256, height: 256}, done)
 })
 
-test('[resize] maintains aspect ratio in clip mode', t => {
-  assertSize({mead, query: {w: 200, h: 500, fit: 'clip'}}, {width: 200, height: 133}, t)
+test('[resize] maintains aspect ratio in clip mode', done => {
+  assertSize({mead, query: {w: 200, h: 500, fit: 'clip'}}, {width: 200, height: 133}, done)
 })
 
-test('[resize] upscales but maintains aspect ratio in clip mode', t => {
-  assertSize({mead, query: {w: 600, h: 531, fit: 'clip'}}, {width: 600, height: 400}, t)
+test('[resize] upscales but maintains aspect ratio in clip mode', done => {
+  assertSize({mead, query: {w: 600, h: 531, fit: 'clip'}}, {width: 600, height: 400}, done)
 })
 
-test('[resize] ignores resize in clip mode when no w/h given', t => {
-  assertSize({mead, query: {fit: 'clip'}}, {width: 300, height: 200}, t)
+test('[resize] ignores resize in clip mode when no w/h given', done => {
+  assertSize({mead, query: {fit: 'clip'}}, {width: 300, height: 200}, done)
 })
 
 /**********************
  * CLIP BY DEFAULT    *
  **********************/
-test('[resize] uses clip fit by default', t => {
-  let done = 0
-  const end = t.end
-  t.end = err => ++done === 4 && end.call(t, err)
+test('[resize] uses clip fit by default', end => {
+  let completed = 0
+  const done = err => ++completed === 4 && end.call(end, err)
 
-  assertSize({mead, query: {w: 256}, fixture: 'mead.png'}, {width: 256, height: 256}, t)
-  assertSize({mead, query: {w: 200, h: 500}}, {width: 200, height: 133}, t)
-  assertSize({mead, query: {w: 600, h: 531}}, {width: 600, height: 400}, t)
-  assertSize({mead, query: {}}, {width: 300, height: 200}, t)
+  assertSize({mead, query: {w: 256}, fixture: 'mead.png'}, {width: 256, height: 256}, done)
+  assertSize({mead, query: {w: 200, h: 500}}, {width: 200, height: 133}, done)
+  assertSize({mead, query: {w: 600, h: 531}}, {width: 600, height: 400}, done)
+  assertSize({mead, query: {}}, {width: 300, height: 200}, done)
 })
 
 /********************
  * CROP MODE        *
  ********************/
-test('[resize] crops to match dimensions in crop mode', t => {
-  assertSize({mead, query: {w: 300, h: 100, fit: 'crop'}}, {width: 300, height: 100}, t)
+test('[resize] crops to match dimensions in crop mode', done => {
+  assertSize({mead, query: {w: 300, h: 100, fit: 'crop'}}, {width: 300, height: 100}, done)
 })
 
-test('[resize] crops to match dimensions in crop mode (square)', t => {
-  assertSize({mead, query: {w: 200, h: 200, fit: 'crop'}}, {width: 200, height: 200}, t)
+test('[resize] crops to match dimensions in crop mode (square)', done => {
+  assertSize({mead, query: {w: 200, h: 200, fit: 'crop'}}, {width: 200, height: 200}, done)
 })
 
-test('[resize] crops to focal point', t => {
+test('[resize] crops to focal point', done => {
   readImage('landscape.png?fp-x=0.10&fp-y=.62&w=256&h=256&fit=crop&crop=focalpoint').then(img => {
-    t.equal(img.colorAt(5, 215), 'f59b07', 'color is correct on crop')
-    t.end()
+    expect(img.colorAt(5, 215)).toBe('f59b07')
+    done()
   })
 })
 
-test('[resize] crops to focal point (alt)', t => {
+test('[resize] crops to focal point (alt)', done => {
   readImage('landscape.png?fp-x=.698&fp-y=0.367&w=256&h=256&fit=crop&crop=focalpoint').then(img => {
-    t.equal(img.colorAt(128, 96), '8e44ae', 'color is correct on crop')
-    t.end()
+    expect(img.colorAt(128, 96)).toBe('8e44ae')
+    done()
   })
 })
 
-test('[resize] crops to focal point (square)', t => {
+test('[resize] crops to focal point (square)', done => {
   readImage('mead.png?fp-x=0.75&fp-y=0.75&w=256&h=256&fit=crop&crop=focalpoint').then(img => {
-    t.equal(img.colorAt(192, 192), 'ff9300', 'color is correct on crop')
-    t.end()
+    expect(img.colorAt(192, 192)).toBe('ff9300')
+    done()
   })
 })
 
-test('[resize] ignores resize in crop mode when no w/h given', t => {
-  assertSize({mead, query: {fit: 'crop'}}, {width: 300, height: 200}, t)
+test('[resize] ignores resize in crop mode when no w/h given', done => {
+  assertSize({mead, query: {fit: 'crop'}}, {width: 300, height: 200}, done)
 })
 
 /********************
  * FILL MODE        *
  ********************/
-test('[resize] fills to match dimensions in fill mode (target larger than original)', t => {
-  assertSize({mead, query: {w: 400, h: 420, bg: 'ccc', fit: 'fill'}}, {width: 400, height: 420}, t)
+test('[resize] fills to match dimensions in fill mode (target larger than original)', done => {
+  assertSize({mead, query: {w: 400, h: 420, bg: 'ccc', fit: 'fill'}}, {width: 400, height: 420}, done)
 })
 
-test('[resize] fills to match dimensions in fill mode (target smaller than original)', t => {
-  assertSize({mead, query: {w: 180, h: 150, bg: 'ccc', fit: 'fill'}}, {width: 180, height: 150}, t)
+test('[resize] fills to match dimensions in fill mode (target smaller than original)', done => {
+  assertSize({mead, query: {w: 180, h: 150, bg: 'ccc', fit: 'fill'}}, {width: 180, height: 150}, done)
 })
 
-test('[resize] ignores resize in fill mode when no w/h given', t => {
-  assertSize({mead, query: {fit: 'fill'}}, {width: 300, height: 200}, t)
+test('[resize] ignores resize in fill mode when no w/h given', done => {
+  assertSize({mead, query: {fit: 'fill'}}, {width: 300, height: 200}, done)
 })
 
 /********************
  * FILLMAX MODE     *
  ********************/
-test('[resize] fills to match dimensions in fillmax mode (target larger than original)', t => {
-  assertSize({mead, query: {w: 400, h: 420, bg: 'ccc', fit: 'fillmax'}}, {width: 400, height: 420}, t)
+test('[resize] fills to match dimensions in fillmax mode (target larger than original)', done => {
+  assertSize({mead, query: {w: 400, h: 420, bg: 'ccc', fit: 'fillmax'}}, {width: 400, height: 420}, done)
 })
 
-test('[resize] fills to match dimensions in fillmax mode (target smaller than original)', t => {
-  assertSize({mead, query: {w: 180, h: 150, bg: 'ccc', fit: 'fillmax'}}, {width: 180, height: 150}, t)
+test('[resize] fills to match dimensions in fillmax mode (target smaller than original)', done => {
+  assertSize({mead, query: {w: 180, h: 150, bg: 'ccc', fit: 'fillmax'}}, {width: 180, height: 150}, done)
 })
 
-test('[resize] fills the remainder of the size with background color', t => {
+test('[resize] fills the remainder of the size with background color', done => {
   readImage('mead.png?w=256&h=512&fit=fillmax&bg=bf1942').then(img => {
-    t.equal(img.width, 256, 'correct width')
-    t.equal(img.height, 512, 'correct height')
-    t.equal(img.colorAt(0, 0), 'bf1942', 'correct color (top)')
-    t.equal(img.colorAt(0, 511), 'bf1942', 'correct color (bottom)')
-    t.end()
+    expect(img.width).toBe(256)
+    expect(img.height).toBe(512)
+    expect(img.colorAt(0, 0)).toBe('bf1942')
+    expect(img.colorAt(0, 511)).toBe('bf1942')
+    done()
   })
 })
 
-test('[resize] ignores resize in fillmax mode when no w/h given', t => {
-  assertSize({mead, query: {fit: 'fillmax'}}, {width: 300, height: 200}, t)
+test('[resize] ignores resize in fillmax mode when no w/h given', done => {
+  assertSize({mead, query: {fit: 'fillmax'}}, {width: 300, height: 200}, done)
 })
 
 /********************
  * MAX MODE         *
  ********************/
-test('[resize] resizes to maximum of original size in max mode', t => {
-  assertSize({mead, query: {w: 400, h: 420, fit: 'max'}}, {width: 300, height: 200}, t)
+test('[resize] resizes to maximum of original size in max mode', done => {
+  assertSize({mead, query: {w: 400, h: 420, fit: 'max'}}, {width: 300, height: 200}, done)
 })
 
-test('[resize] resizes to less than original size in max mode (maintains aspect)', t => {
-  assertSize({mead, query: {w: 180, h: 150, fit: 'max'}}, {width: 180, height: 120}, t)
+test('[resize] resizes to less than original size in max mode (maintains aspect)', done => {
+  assertSize({mead, query: {w: 180, h: 150, fit: 'max'}}, {width: 180, height: 120}, done)
 })
 
-test('[resize] ignores resize in max mode when no w/h given', t => {
-  assertSize({mead, query: {fit: 'max'}}, {width: 300, height: 200}, t)
+test('[resize] ignores resize in max mode when no w/h given', done => {
+  assertSize({mead, query: {fit: 'max'}}, {width: 300, height: 200}, done)
 })
 
 /********************
  * MIN MODE         *
  ********************/
-test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#1)', t => {
-  assertSize({mead, query: {w: 500, h: 2000, fit: 'min'}}, {width: 50, height: 200}, t)
+test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#1)', done => {
+  assertSize({mead, query: {w: 500, h: 2000, fit: 'min'}}, {width: 50, height: 200}, done)
 })
 
-test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#2)', t => {
-  assertSize({mead, query: {w: 300, h: 100, fit: 'min'}}, {width: 300, height: 100}, t)
+test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#2)', done => {
+  assertSize({mead, query: {w: 300, h: 100, fit: 'min'}}, {width: 300, height: 100}, done)
 })
 
-test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#3)', t => {
-  assertSize({mead, query: {w: 150, h: 100, fit: 'min'}}, {width: 150, height: 100}, t)
+test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#3)', done => {
+  assertSize({mead, query: {w: 150, h: 100, fit: 'min'}}, {width: 150, height: 100}, done)
 })
 
-test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#4)', t => {
-  assertSize({mead, query: {w: 300, h: 205, fit: 'min'}}, {width: 293, height: 200}, t)
+test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#4)', done => {
+  assertSize({mead, query: {w: 300, h: 205, fit: 'min'}}, {width: 293, height: 200}, done)
 })
 
-test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#5)', t => {
-  assertSize({mead, query: {w: 400, h: 205, fit: 'min'}}, {width: 300, height: 154}, t)
+test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#5)', done => {
+  assertSize({mead, query: {w: 400, h: 205, fit: 'min'}}, {width: 300, height: 154}, done)
 })
 
-test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#6)', t => {
-  assertSize({mead, query: {w: 500, h: 200, fit: 'min'}}, {width: 300, height: 120}, t)
+test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#6)', done => {
+  assertSize({mead, query: {w: 500, h: 200, fit: 'min'}}, {width: 300, height: 120}, done)
 })
 
-test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#7)', t => {
-  assertSize({mead, query: {w: 200, h: 250, fit: 'min'}}, {width: 160, height: 200}, t)
+test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#7)', done => {
+  assertSize({mead, query: {w: 200, h: 250, fit: 'min'}}, {width: 160, height: 200}, done)
 })
 
-test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#8)', t => {
-  assertSize({mead, query: {w: 200, h: 180, fit: 'min'}}, {width: 200, height: 180}, t)
+test('[resize] resizes/crops to given aspect ratio, not exceeding original size (#8)', done => {
+  assertSize({mead, query: {w: 200, h: 180, fit: 'min'}}, {width: 200, height: 180}, done)
 })
 
-test('[resize] ignores resize in min mode when no w/h given', t => {
-  assertSize({mead, query: {fit: 'min'}}, {width: 300, height: 200}, t)
+test('[resize] ignores resize in min mode when no w/h given', done => {
+  assertSize({mead, query: {fit: 'min'}}, {width: 300, height: 200}, done)
 })
 
 /********************
  * SCALE MODE       *
  ********************/
-test('[resize] always scales to given size in scale mode, ignores aspect ratio (#1)', t => {
-  assertSize({mead, query: {w: 400, h: 420, fit: 'scale'}}, {width: 400, height: 420}, t)
+test('[resize] always scales to given size in scale mode, ignores aspect ratio (#1)', done => {
+  assertSize({mead, query: {w: 400, h: 420, fit: 'scale'}}, {width: 400, height: 420}, done)
 })
 
-test('[resize] always scales to given size in scale mode, ignores aspect ratio (#2)', t => {
-  assertSize({mead, query: {w: 177, h: 981, fit: 'scale'}}, {width: 177, height: 981}, t)
+test('[resize] always scales to given size in scale mode, ignores aspect ratio (#2)', done => {
+  assertSize({mead, query: {w: 177, h: 981, fit: 'scale'}}, {width: 177, height: 981}, done)
 })
 
-test('[resize] ignores resize in scale mode when no w/h given', t => {
-  assertSize({mead, query: {fit: 'scale'}}, {width: 300, height: 200}, t)
+test('[resize] ignores resize in scale mode when no w/h given', done => {
+  assertSize({mead, query: {fit: 'scale'}}, {width: 300, height: 200}, done)
 })
 
 /********************
  * FRACTION SIZE    *
  ********************/
-test('[resize] can use fractions of original width to resize', t => {
-  assertSize({mead, query: {w: 0.5}, fixture: 'mead.png'}, {width: 256, height: 256}, t)
+test('[resize] can use fractions of original width to resize', done => {
+  assertSize({mead, query: {w: 0.5}, fixture: 'mead.png'}, {width: 256, height: 256}, done)
 })
 
-test('[resize] can use fractions of original height to resize', t => {
-  assertSize({mead, query: {h: 0.25}, fixture: 'mead.png'}, {width: 128, height: 128}, t)
+test('[resize] can use fractions of original height to resize', done => {
+  assertSize({mead, query: {h: 0.25}, fixture: 'mead.png'}, {width: 128, height: 128}, done)
 })
 
 /********************
  * OVERLAY + RESIZE *
  ********************/
-test('[resize] can overlay when resizing', t => {
+test('[resize] can overlay when resizing', done => {
   assertSize(
     {mead, query: {w: 700, border: '10,ccbf1942'}, fixture: 'landscape.png'},
-    {width: 700}, t
+    {width: 700}, done
   )
 })
 
 /**********************
  * MAX WIDTH/HEIGHT   *
  **********************/
-test('[resize] can give a max width when fit is "crop"', t => {
+test('[resize] can give a max width when fit is "crop"', done => {
   assertSize(
     {mead, query: {'max-w': 512, h: 500, fit: 'crop'}, fixture: 'landscape.png'},
-    {width: 512, height: 500}, t
+    {width: 512, height: 500}, done
   )
 })
 
-test('[resize] can give a max height when fit is "crop"', t => {
+test('[resize] can give a max height when fit is "crop"', done => {
   assertSize(
     {mead, query: {'max-h': 400, w: 800, fit: 'crop'}, fixture: 'landscape.png'},
-    {width: 800, height: 400}, t
+    {width: 800, height: 400}, done
   )
 })
 
-test('[resize] max width does nothing if fit is not "crop"', t => {
+test('[resize] max width does nothing if fit is not "crop"', done => {
   assertSize(
     {mead, query: {'max-w': 512, h: 500}, fixture: 'landscape.png'},
-    {width: 988, height: 500}, t
+    {width: 988, height: 500}, done
   )
 })
 
-test('[resize] max height does nothing if fit is not "crop"', t => {
+test('[resize] max height does nothing if fit is not "crop"', done => {
   assertSize(
     {mead, query: {'max-h': 400, w: 800}, fixture: 'landscape.png'},
-    {width: 800, height: 405}, t
+    {width: 800, height: 405}, done
   )
 })
 
 /**********************
  * SHRINK TO ZERO     *
  **********************/
-test.skip('[resize] will not shrink images to below 1px in height', t => {
+test.skip('[resize] will not shrink images to below 1px in height', done => {
   assertSize(
     {mead, query: {w: 100}, fixture: '2000x4.png'},
-    {width: 100, height: 1}, t
+    {width: 100, height: 1}, done
   )
 })
 
-test.skip('[resize] will not shrink images to below 1px in width', t => {
+test.skip('[resize] will not shrink images to below 1px in width', done => {
   assertSize(
     {mead, query: {h: 100}, fixture: '4x2000.png'},
-    {height: 100, width: 1}, t
+    {height: 100, width: 1}, done
   )
 })
 
@@ -404,27 +402,24 @@ tests.forEach(it => {
   const filename = operation.split('.', 2)[0]
   const fit = (operation.match(/&fit=(.*?)(&|$)/) || [])[1] || 'default'
 
-  test(`[resize] [${testNum}] ${filename} using ${fit}`, t => {
+  test(`[resize] [${testNum}] ${filename} using ${fit}`, done => {
     readImage(`/${operation}`).then(img => {
       if (expected.calc.w) {
         const range = {min: expected.w - 1, max: expected.w + 1}
-        t.ok(img.width >= range.min && img.width <= range.max, `[width] ${operation} (acceptable)`)
+        expect(img.width >= range.min && img.width <= range.max).toBeTruthy()
       } else {
-        t.equal(img.width, expected.w, `[width] ${operation}`)
+        expect(img.width).toBe(expected.w)
       }
 
       if (expected.calc.h) {
         const range = {min: expected.h - 1, max: expected.h + 1}
-        t.ok(img.height >= range.min && img.height <= range.max, `[height] ${operation} (acceptable)`)
+        expect(img.height >= range.min && img.height <= range.max).toBeTruthy()
       } else {
-        t.equal(img.height, expected.h, `[height] ${operation}`)
+        expect(img.height).toBe(expected.h)
       }
 
-      t.end()
-    }).catch(err => {
-      t.fail(err.message)
-      t.end()
-    })
+      done()
+    }).catch(done)
   })
 })
 

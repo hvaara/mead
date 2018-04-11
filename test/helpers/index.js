@@ -1,6 +1,5 @@
-require('tape-chai')
-
 const path = require('path')
+const assert = require('assert')
 const qs = require('querystring')
 const pify = require('pify')
 const sharp = require('sharp')
@@ -25,23 +24,22 @@ exports.config = config
 exports.fixtures = require('../fixtures')
 exports.app = (cfg, cb) => mead(cb ? config(cfg) : config(), cb || cfg)
 exports.appify = pify(exports.app)
-exports.assertImageMeta = (res, target, t) => {
+exports.assertImageMeta = (res, target, done) => {
   if (!Buffer.isBuffer(res.body)) {
-    t.fail(`Body is not a buffer: ${JSON.stringify(res.body)}`)
-    t.end()
+    done(new Error(`Body is not a buffer: ${JSON.stringify(res.body)}`))
     return
   }
 
   sharp(res.body).metadata().then(info => {
     Object.keys(target).forEach(key => {
-      t.equal(info[key], target[key], `same ${key}`)
+      expect(info[key]).toEqual(target[key])
     })
 
-    t.end()
+    done()
   })
 }
 
-exports.assertSize = (opts, assert, t) => {
+exports.assertSize = (opts, expected, done) => {
   return (opts.mead ? opts.mead : exports.appify()).then(server => {
     const req = request(server)
       .get(`/foo/images/${opts.fixture || '300x200.png'}?${qs.stringify(opts.query)}`)
@@ -58,13 +56,11 @@ exports.assertSize = (opts, assert, t) => {
 
     req.expect(opts.statusCode || 200)
     req.end((reqErr, res) => {
-      t.ifError(reqErr, 'shouldnt error')
-      exports.assertImageMeta(res, assert, t)
+      return reqErr
+        ? done(reqErr)
+        : exports.assertImageMeta(res, expected, done)
     })
-  }).catch(err => {
-    t.ifError(err, 'no error on boot')
-    t.end()
-  })
+  }).catch(done)
 }
 
 exports.readImage = imgPath => {
@@ -101,16 +97,12 @@ function imgify(body) {
           return
         }
 
-        img.colorAtIsApprox = (x, y, color, t, threshold = 12) => {
+        img.colorAtIsApprox = (x, y, color, threshold = 12) => {
           const actualHex = img.colorAt(x, y)
           const actual = actualHex.match(/.{2}/g).map(decify)
           const target = color.match(/.{2}/g).map(decify)
           const distance = target.reduce((dist, col, i) => dist + Math.abs(col - actual[i]), 0)
-          if (distance <= threshold) {
-            t.pass('color within range')
-          } else {
-            t.fail(`color ${actualHex} out of range (${distance} > ${threshold})`)
-          }
+          assert.ok(distance <= threshold, `color ${actualHex} out of range (${distance} > ${threshold})`)
         }
 
         img.colorAt = (x, y) => {

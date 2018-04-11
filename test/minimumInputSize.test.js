@@ -1,4 +1,3 @@
-const test = require('tape')
 const minimumInputSize = require('../src/transform/minimumInputSize')
 
 const tests = [
@@ -158,10 +157,9 @@ const tests = [
 
 // @todo add more tests for different fits
 tests.forEach(({name, meta, params, expected}, i) => {
-  test(`[minimumInputSize] can determine correct min size (${name})`, t => {
+  test(`[minimumInputSize] can determine correct min size (${name})`, () => {
     const result = minimumInputSize(params, meta)
-    t.equal(result.width, expected.width, 'correct width')
-    t.equal(result.height, expected.height, 'correct height')
-    t.end()
+    expect(result.width).toBe(expected.width)
+    expect(result.height).toBe(expected.height)
   })
 })

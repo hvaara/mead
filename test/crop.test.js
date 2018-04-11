@@ -1,4 +1,3 @@
-const test = require('tape')
 const {readImage} = require('./helpers')
 
 const modes = [
@@ -12,12 +11,12 @@ const modes = [
 
 modes.forEach(mode => {
   const [gravity, x, y, color] = mode
-  test(`[crop] can crop with gravity ${gravity}`, t => {
+  test(`[crop] can crop with gravity ${gravity}`, done => {
     readImage(`landscape.png?w=300&h=300&fit=crop&crop=${gravity}`).then(img => {
-      t.equal(img.width, 300, 'correct width')
-      t.equal(img.height, 300, 'correct height')
-      img.colorAtIsApprox(x, y, color, t, 30)
-      t.end()
-    }).catch(t.end)
+      expect(img.width).toBe(300)
+      expect(img.height).toBe(300)
+      img.colorAtIsApprox(x, y, color, 30)
+      done()
+    }).catch(done)
   })
 })

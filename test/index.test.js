@@ -1,26 +1,25 @@
-const test = require('tape')
 const request = require('supertest')
 const {app} = require('./helpers')
 const pkg = require('../package.json')
 
-test('[index] index route serves basic info', t => {
+test('[index] index route serves basic info', done => {
   app((err, mead) => {
-    t.ifError(err)
+    expect(err).toBeFalsy()
 
     request(mead)
       .get('/')
       .expect('Content-Type', /json/)
-      .expect(200, {service: pkg.name}, t.end)
+      .expect(200, {service: pkg.name}, done)
   })
 })
 
-test('[index] favicon route serves favicon', t => {
+test('[index] favicon route serves favicon', done => {
   app((err, mead) => {
-    t.ifError(err)
+    expect(err).toBeFalsy()
 
     request(mead)
       .get('/favicon.ico')
       .expect('Content-Type', /icon/)
-      .expect(200, t.end)
+      .expect(200, done)
   })
 })

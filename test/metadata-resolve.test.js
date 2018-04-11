@@ -1,9 +1,8 @@
 const path = require('path')
-const test = require('tape')
 const request = require('supertest')
 const {app, assertImageMeta} = require('./helpers')
 
-test('[metadata-resolve] plugins allows overriding metadata resolving', t => {
+test('[metadata-resolve] plugins allows overriding metadata resolving', done => {
   app({
     plugins: [
       {
@@ -13,13 +12,13 @@ test('[metadata-resolve] plugins allows overriding metadata resolving', t => {
       }
     ]
   }, (err, mead) => {
-    t.ifError(err, 'no error')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/320x180.png?or=90')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        assertImageMeta(res, {width: 180, height: 320}, t)
+        expect(reqErr).toBeFalsy()
+        assertImageMeta(res, {width: 180, height: 320}, done)
       })
   })
 })

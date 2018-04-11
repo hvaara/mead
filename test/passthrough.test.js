@@ -1,31 +1,30 @@
-const test = require('tape')
 const request = require('supertest')
 const {app, assertImageMeta} = require('./helpers')
 
-test('[passthrough] svgs are passed through without any transformations', t => {
+test('[passthrough] svgs are passed through without any transformations', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/mead.svg?w=200')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        t.equals(res.headers['content-type'], 'image/svg+xml', 'svg content type')
-        t.end()
+        expect(reqErr).toBeFalsy()
+        expect(res.headers['content-type']).toBe('image/svg+xml')
+        done()
       })
   })
 })
 
-test('[passthrough] gifs are passed through without any transformations', t => {
+test('[passthrough] gifs are passed through without any transformations', done => {
   app((err, mead) => {
-    t.ifError(err, 'no error on boot')
+    expect(err).toBeFalsy()
     request(mead)
       .get('/foo/images/mead.gif?w=200')
       .expect(200)
       .end((reqErr, res) => {
-        t.ifError(reqErr, 'no error')
-        t.equals(res.headers['content-type'], 'image/gif', 'gif content type')
-        assertImageMeta(res, {width: 512, height: 512}, t)
+        expect(reqErr).toBeFalsy()
+        expect(res.headers['content-type']).toBe('image/gif')
+        assertImageMeta(res, {width: 512, height: 512}, done)
       })
   })
 })

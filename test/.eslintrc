@@ -1,5 +1,8 @@
 {
   "rules": {
     "id-length": 0
+  },
+  "env": {
+    "jest": true
   }
 }

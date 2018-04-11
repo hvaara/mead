@@ -1,131 +1,110 @@
-const test = require('tape')
 const fromQueryString = require('../src/parameters/fromQueryString')
 
-test('[queryparams] translates `w` param into numeric `width`', t => {
+test('[queryparams] translates `w` param into numeric `width`', () => {
   const {width} = fromQueryString({w: '1024'})
-  t.equal(width, 1024)
-  t.end()
+  expect(width).toBe(1024)
 })
 
-test('[queryparams] does not throw on unknown params', t => {
+test('[queryparams] does not throw on unknown params', () => {
   fromQueryString({w: '1024', foo: 'bar'})
-  t.end()
 })
 
-test('[queryparams] translates `h` param into numeric `height`', t => {
+test('[queryparams] translates `h` param into numeric `height`', () => {
   const {height} = fromQueryString({h: '768'})
-  t.equal(height, 768)
-  t.end()
+  expect(height).toBe(768)
 })
 
-test('[queryparams] translates `q` param into numeric `quality`', t => {
+test('[queryparams] translates `q` param into numeric `quality`', () => {
   const {quality} = fromQueryString({q: '90'})
-  t.equal(quality, 90)
-  t.end()
+  expect(quality).toBe(90)
 })
 
-test('[queryparams] translates `or` param into numeric `orientation`', t => {
+test('[queryparams] translates `or` param into numeric `orientation`', () => {
   const {orientation} = fromQueryString({or: '90'})
-  t.equal(orientation, 90)
-  t.end()
+  expect(orientation).toBe(90)
 })
 
-test('[queryparams] throws if `or` param is not 0, 90, 180 or 270', t => {
-  t.throws(() => fromQueryString({or: '15'}), /must be one of/)
-  t.throws(() => fromQueryString({or: '89'}), /must be one of/)
-  t.end()
+test('[queryparams] throws if `or` param is not 0, 90, 180 or 270', () => {
+  expect(() => fromQueryString({or: '15'})).toThrowError(/must be one of/)
+  expect(() => fromQueryString({or: '89'})).toThrowError(/must be one of/)
 })
 
-test('[queryparams] translates `fm` param into object `output`', t => {
+test('[queryparams] translates `fm` param into object `output`', () => {
   const {output} = fromQueryString({fm: 'pjpg'})
-  t.deepEqual(output, {format: 'jpeg', mime: 'image/jpeg', progressive: true})
-  t.end()
+  expect(output).toEqual({format: 'jpeg', mime: 'image/jpeg', progressive: true})
 })
 
-test('[queryparams] translates `fm` param into object `output` (alt)', t => {
+test('[queryparams] translates `fm` param into object `output` (alt)', () => {
   const {output} = fromQueryString({fm: 'png'})
-  t.deepEqual(output, {format: 'png', mime: 'image/png', progressive: false})
-  t.end()
+  expect(output).toEqual({format: 'png', mime: 'image/png', progressive: false})
 })
 
-test('[queryparams] translates `dl` param into `download`', t => {
+test('[queryparams] translates `dl` param into `download`', () => {
   const {download} = fromQueryString({dl: 'mahfile.png'})
-  t.equal(download, 'mahfile.png')
-  t.end()
+  expect(download).toBe('mahfile.png')
 })
 
-test('[queryparams] translates `bg` param into `backgroundColor`', t => {
+test('[queryparams] translates `bg` param into `backgroundColor`', () => {
   const {backgroundColor} = fromQueryString({bg: 'ccddee'})
-  t.equal(backgroundColor, '#ccddee')
-  t.end()
+  expect(backgroundColor).toBe('#ccddee')
 })
 
-test('[queryparams] translates `bg` param into `backgroundColor` (alpha included)', t => {
+test('[queryparams] translates `bg` param into `backgroundColor` (alpha included)', () => {
   const {backgroundColor} = fromQueryString({bg: 'aaccddee'})
-  t.deepEqual(backgroundColor, {
+  expect(backgroundColor).toEqual({
     r: 204,
     g: 221,
     b: 238,
     alpha: 2 / 3
   })
-  t.end()
 })
 
-test('[queryparams] translates `bg` param into `backgroundColor` (alpha included - alt)', t => {
+test('[queryparams] translates `bg` param into `backgroundColor` (alpha included - alt)', () => {
   const {backgroundColor} = fromQueryString({bg: 'acde'})
-  t.deepEqual(backgroundColor, {
+  expect(backgroundColor).toEqual({
     r: 204,
     g: 221,
     b: 238,
     alpha: 2 / 3
   })
-  t.end()
 })
 
-test('[queryparams] throws if `bg` param is not in hex format', t => {
-  t.throws(() => fromQueryString({bg: '255,128,131'}), /hexadecimal/)
-  t.end()
+test('[queryparams] throws if `bg` param is not in hex format', () => {
+  expect(() => fromQueryString({bg: '255,128,131'})).toThrowError(/hexadecimal/)
 })
 
-test('[queryparams] throws if `bg` param is not in known hex format', t => {
-  t.throws(() => fromQueryString({bg: 'cdebc'}), /hexadecimal/i)
-  t.throws(() => fromQueryString({bg: 'cdebc'}), /allowed formats/i)
-  t.end()
+test('[queryparams] throws if `bg` param is not in known hex format', () => {
+  expect(() => fromQueryString({bg: 'cdebc'})).toThrowError(/hexadecimal/i)
+  expect(() => fromQueryString({bg: 'cdebc'})).toThrowError(/allowed formats/i)
 })
 
-test('[queryparams] throws if passing non-integers to integer params', t => {
-  t.throws(() => fromQueryString({w: 'foo'}), /valid (number|integer)/)
-  t.throws(() => fromQueryString({h: 'foo'}), /valid (number|integer)/)
-  t.throws(() => fromQueryString({q: 'foo'}), /valid (number|integer)/)
-  t.throws(() => fromQueryString({or: 'foo'}), /valid (number|integer)/)
-  t.end()
+test('[queryparams] throws if passing non-integers to integer params', () => {
+  expect(() => fromQueryString({w: 'foo'})).toThrowError(/valid (number|integer)/)
+  expect(() => fromQueryString({h: 'foo'})).toThrowError(/valid (number|integer)/)
+  expect(() => fromQueryString({q: 'foo'})).toThrowError(/valid (number|integer)/)
+  expect(() => fromQueryString({or: 'foo'})).toThrowError(/valid (number|integer)/)
 })
 
-test('[queryparams] throws if passing floats to integer params', t => {
-  t.throws(() => fromQueryString({w: '18.541'}), /valid integer/)
-  t.throws(() => fromQueryString({h: '155.1'}), /valid integer/)
-  t.throws(() => fromQueryString({q: '87.4'}), /valid integer/)
-  t.throws(() => fromQueryString({or: '56.4'}), /valid integer/)
-  t.end()
+test('[queryparams] throws if passing floats to integer params', () => {
+  expect(() => fromQueryString({w: '18.541'})).toThrowError(/valid integer/)
+  expect(() => fromQueryString({h: '155.1'})).toThrowError(/valid integer/)
+  expect(() => fromQueryString({q: '87.4'})).toThrowError(/valid integer/)
+  expect(() => fromQueryString({or: '56.4'})).toThrowError(/valid integer/)
 })
 
-test('[queryparams] throws if passing negative numbers to pixel-params', t => {
-  t.throws(() => fromQueryString({w: '-130'}), /positive number/)
-  t.throws(() => fromQueryString({h: '-1'}), /positive number/)
-  t.end()
+test('[queryparams] throws if passing negative numbers to pixel-params', () => {
+  expect(() => fromQueryString({w: '-130'})).toThrowError(/positive number/)
+  expect(() => fromQueryString({h: '-1'})).toThrowError(/positive number/)
 })
 
-test('[queryparams] throws if quality is out of range', t => {
-  t.throws(() => fromQueryString({q: '800'}), /be between/)
-  t.end()
+test('[queryparams] throws if quality is out of range', () => {
+  expect(() => fromQueryString({q: '800'})).toThrowError(/be between/)
 })
 
-test('[queryparams] throws if source rectangle does not have 4 integers', t => {
-  t.throws(() => fromQueryString({rect: '800'}), /x,y,w,h/)
-  t.end()
+test('[queryparams] throws if source rectangle does not have 4 integers', () => {
+  expect(() => fromQueryString({rect: '800'})).toThrowError(/x,y,w,h/)
 })
 
-test('[queryparams] throws if crop is not positional', t => {
-  t.throws(() => fromQueryString({crop: 'foo'}), /one of/)
-  t.end()
+test('[queryparams] throws if crop is not positional', () => {
+  expect(() => fromQueryString({crop: 'foo'})).toThrowError(/one of/)
 })
