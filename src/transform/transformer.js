@@ -56,6 +56,10 @@ function sourceRect(tr, params, meta) {
 
   const [left, top, width, height] = rect
   tr.extract({left, top, width, height})
+
+  // @todo this is a hack. We should have a "current input size" that we track and modify throughout
+  meta.width = Math.min(width, meta.width)
+  meta.height = Math.min(height, meta.height)
 }
 
 function invert(tr, params) {
@@ -118,8 +122,8 @@ function fit(tr, params, meta) {
 function fitClip(tr, params, meta, opts) {
   params.outputSize = opts.constrain(opts.getOutputSize({sizeMode: 'max'}))
   const {width, height} = params.outputSize
-
   const isLandscape = width > height
+
   tr.max().resize(
     isLandscape ? width : undefined,
     isLandscape ? undefined : height

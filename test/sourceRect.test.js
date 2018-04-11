@@ -32,3 +32,11 @@ test('[sourceRect] scales passed source rect with focal point', done => {
     done()
   })
 })
+
+test.only('[sourceRect] pairs with resize', done => {
+  readImage('200x300.png?rect=15,0,90,300&w=30').then(img => {
+    expect(img.width).toBe(30)
+    expect(img.height).toBe(100)
+    done()
+  })
+})
