@@ -1,5 +1,7 @@
 const minimumInputSize = require('../src/transform/minimumInputSize')
 
+jest.setTimeout(15000)
+
 const tests = [
   // === Fit: crop ===
   // Resize: Square

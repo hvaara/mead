@@ -2,6 +2,8 @@ const path = require('path')
 const request = require('supertest')
 const {app, assertImageMeta} = require('./helpers')
 
+jest.setTimeout(15000)
+
 test('[metadata-resolve] plugins allows overriding metadata resolving', done => {
   app({
     plugins: [

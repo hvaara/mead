@@ -1,6 +1,8 @@
 const mead = require('..')
 const {fixtures, config} = require('./helpers')
 
+jest.setTimeout(15000)
+
 test('[boot] errors if no sourceResolver is set', done => {
   mead({}, err => {
     expect(err).toBeInstanceOf(Error)

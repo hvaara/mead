@@ -1,5 +1,7 @@
 const {readImage} = require('./helpers')
 
+jest.setTimeout(15000)
+
 test('[flip] can flip an image horizontally', done => {
   readImage('small-landscape.png?flip=h').then(img => {
     expect(img.width).toBe(367)

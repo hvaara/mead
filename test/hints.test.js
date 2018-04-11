@@ -1,6 +1,8 @@
 const request = require('supertest')
 const {appify, assertSize} = require('./helpers')
 
+jest.setTimeout(15000)
+
 const mead = appify()
 
 test('[hints] save-data actually saves data', done => {

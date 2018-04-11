@@ -1,5 +1,7 @@
 const {readImage} = require('./helpers')
 
+jest.setTimeout(15000)
+
 const modes = [
   ['top,left', 10, 10, '1abc9c'],
   ['top,right', 299, 10, '34495e'],

@@ -1,5 +1,7 @@
 const {appify, assertSize} = require('./helpers')
 
+jest.setTimeout(15000)
+
 const mead = appify()
 
 test('[dpr] dpr of 1 uses provided width', done => {

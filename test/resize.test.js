@@ -2,6 +2,8 @@ const {appify, assertSize, readImage} = require('./helpers')
 
 const mead = appify()
 
+jest.setTimeout(15000)
+
 // eslint-disable-next-line no-console
 test.skip = testName => console.log(`# Skipped: ${testName}`)
 

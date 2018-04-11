@@ -1,6 +1,8 @@
 const request = require('supertest')
 const {app, assertImageMeta} = require('./helpers')
 
+jest.setTimeout(15000)
+
 test('[passthrough] svgs are passed through without any transformations', done => {
   app((err, mead) => {
     expect(err).toBeFalsy()

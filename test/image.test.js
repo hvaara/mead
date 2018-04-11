@@ -2,6 +2,8 @@ const path = require('path')
 const request = require('supertest')
 const {app, assertImageMeta} = require('./helpers')
 
+jest.setTimeout(15000)
+
 test('[image] 404s on root source path', done => {
   app((err, mead) => {
     expect(err).toBeFalsy()

@@ -1,6 +1,8 @@
 const sourceAdapterLoader = require('../src/middleware/sourceAdapterLoader')
 const sourceResolver = require('../src/middleware/sourceResolver')
 
+jest.setTimeout(15000)
+
 test('[middleware] source adapter loader errors if adapter type is not implemented', done => {
   sourceAdapterLoader(
     {app: {locals: {plugins: {source: {}}}}},

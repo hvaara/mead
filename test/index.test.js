@@ -2,6 +2,8 @@ const request = require('supertest')
 const {app} = require('./helpers')
 const pkg = require('../package.json')
 
+jest.setTimeout(15000)
+
 test('[index] index route serves basic info', done => {
   app((err, mead) => {
     expect(err).toBeFalsy()

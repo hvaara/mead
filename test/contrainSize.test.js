@@ -1,6 +1,8 @@
 /* eslint-disable no-multi-spaces */
 const constrainSize = require('../src/transform/constrainSize')
 
+jest.setTimeout(15000)
+
 test('[constrain] same aspect, smaller than limit, untouched', () => {
   expect(constrainSize(
     1000,                       // Max size

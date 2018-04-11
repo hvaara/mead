@@ -1,5 +1,7 @@
 const {readImage} = require('./helpers')
 
+jest.setTimeout(15000)
+
 test('[transforms] invert colors', done => {
   readImage('small-landscape.png?invert=1').then(img => {
     expect(img.width).toBe(367)

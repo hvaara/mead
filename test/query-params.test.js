@@ -1,5 +1,7 @@
 const fromQueryString = require('../src/parameters/fromQueryString')
 
+jest.setTimeout(15000)
+
 test('[queryparams] translates `w` param into numeric `width`', () => {
   const {width} = fromQueryString({w: '1024'})
   expect(width).toBe(1024)

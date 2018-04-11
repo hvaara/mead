@@ -2,6 +2,8 @@ const drawCrosshairs = require('../src/draw/drawCrosshairs')
 const drawBorder = require('../src/draw/drawBorder')
 const drawContainer = require('../src/draw/drawContainer')
 
+jest.setTimeout(15000)
+
 const width = 429
 const height = 311
 

@@ -1,5 +1,7 @@
 const {readImage} = require('./helpers')
 
+jest.setTimeout(15000)
+
 test('[trim] can trim an image using auto mode', done => {
   readImage('trim.jpg?trim=auto').then(img => {
     expect(img.width).toBe(1024)
