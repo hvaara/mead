@@ -1,5 +1,7 @@
 const {readImage} = require('./helpers')
 
+jest.setTimeout(15000)
+
 test('[sourceRect] uses the passed source rect as input', done => {
   readImage('landscape.png?rect=384,243,768,486').then(img => {
     expect(img.width).toBe(768)
