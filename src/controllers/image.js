@@ -24,6 +24,7 @@ module.exports = (request, response, next) => {
 
   const responseHandlers = values(plugins['response-handler'] || {})
   const metadataResolvers = values(plugins['metadata-resolver'] || {})
+  const inputOptionResolvers = values(plugins['input-option-resolver'] || {})
   const context = {request, response, urlPath}
   const pixelLimit = typeof config.vips.limitInputPixels === 'undefined' ? 268402689 : config.vips.limitInputPixels
 
@@ -43,6 +44,7 @@ module.exports = (request, response, next) => {
     return
   }
 
+  // eslint-disable-next-line complexity
   sourceAdapter.getImageStream(context, async (err, stream) => {
     if (err) {
       handleError(err)
@@ -54,8 +56,8 @@ module.exports = (request, response, next) => {
     const formatSpecified = request.query.fm
     const transformUnsupported = (isSvg || isGif) && !formatSpecified
 
+    let finalParams = await params
     if (transformUnsupported) {
-      const finalParams = await params
       passthrough(stream, getHeaders({format: isSvg ? 'svg' : 'gif'}, finalParams, response))
       return
     }
@@ -68,13 +70,11 @@ module.exports = (request, response, next) => {
       return
     }
 
-    const imageStream = sharp(imageBuffer).limitInputPixels(pixelLimit)
+    const inputOptions = inputOptionResolvers.reduce((opts, resolver) => Object.assign(opts, resolver(context) || {}), {})
+    const imageStream = sharp(imageBuffer, inputOptions).limitInputPixels(pixelLimit)
 
     try {
-      let finalParams
-      if (context.metadata) {
-        finalParams = await params
-      } else {
+      if (!context.metadata) {
         const fromImage = await resolveMetadataFromImage(imageStream)
         finalParams = await finalizeParams(fromImage)
       }
