@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions, complexity */
 const sharp = require('sharp')
 const round = require('./round')
 const drawCrosshairs = require('../draw/drawCrosshairs')
@@ -55,7 +56,7 @@ function sourceRect(tr, params, meta) {
   }
 
   const [left, top, width, height] = rect
-  tr.extract({left, top, width, height})
+  tr && tr.extract({left, top, width, height})
 
   // @todo this is a hack. We should have a "current input size" that we track and modify throughout
   meta.width = Math.min(width, meta.width)
@@ -64,19 +65,19 @@ function sourceRect(tr, params, meta) {
 
 function invert(tr, params) {
   if (params.invert) {
-    tr.negate()
+    tr && tr.negate()
   }
 }
 
 function sharpen(tr, params) {
   if (params.sharpen) {
-    tr.sharpen(parseInt(params.sharpen / 30, 10) || undefined)
+    tr && tr.sharpen(parseInt(params.sharpen / 30, 10) || undefined)
   }
 }
 
 function blur(tr, params) {
   if (params.blur) {
-    tr.blur(params.blur ? Math.max(0.3, params.blur / 8) : undefined)
+    tr && tr.blur(params.blur ? Math.max(0.3, params.blur / 8) : undefined)
   }
 }
 
@@ -86,10 +87,10 @@ function trim(tr, params) {
   }
 
   if (params.trim === 'auto') {
-    return tr.trim()
+    return tr && tr.trim()
   }
 
-  return tr.trim(params.trimTolerance || undefined)
+  return tr && tr.trim(params.trimTolerance || undefined)
 }
 
 function resize(tr, params, meta, opts) {
@@ -103,7 +104,7 @@ function resize(tr, params, meta, opts) {
     : params
 
   params.outputSize = round(getOutputSize(params, meta, {sizeMode: 'simple'}))
-  tr.resize(
+  tr && tr.resize(
     size.width ? Math.round(size.width) : null,
     size.height ? Math.round(size.height) : null
   )
@@ -124,7 +125,7 @@ function fitClip(tr, params, meta, opts) {
   const {width, height} = params.outputSize
   const isLandscape = width > height
 
-  tr.max().resize(
+  tr && tr.max().resize(
     isLandscape ? width : undefined,
     isLandscape ? undefined : height
   )
@@ -145,7 +146,7 @@ function fitScale(tr, params, meta, opts) {
     sizeHeight = isLandscape ? undefined : height
   }
 
-  tr[sizeMode]().resize(sizeWidth, sizeHeight)
+  tr && tr[sizeMode]().resize(sizeWidth, sizeHeight)
 }
 
 function fitFill(tr, params, meta, opts) {
@@ -154,10 +155,10 @@ function fitFill(tr, params, meta, opts) {
   const {width, height} = params.outputSize
 
   if (sizeMode === 'embed') {
-    tr.embed().resize(width, height)
+    tr && tr.embed().resize(width, height)
   } else {
     const isLandscape = width > height
-    tr.max().resize(
+    tr && tr.max().resize(
       isLandscape ? width : undefined,
       isLandscape ? undefined : height
     )
@@ -174,7 +175,7 @@ function fitFillMax(tr, params, meta, opts) {
 
   const {width, height} = params.outputSize
   const isLandscape = width > height
-  tr.withoutEnlargement().max().resize(
+  tr && tr.withoutEnlargement().max().resize(
     isLandscape ? width : undefined,
     isLandscape ? undefined : height
   )
@@ -213,7 +214,7 @@ function fitFillMax(tr, params, meta, opts) {
   params.outputSize.width += extendBy.left + extendBy.right
   params.outputSize.height += extendBy.top + extendBy.bottom
 
-  tr.extend(extendBy)
+  tr && tr.extend(extendBy)
 }
 
 function fitMax(tr, params, meta, opts) {
@@ -226,7 +227,7 @@ function fitMax(tr, params, meta, opts) {
 
   const {width, height} = params.outputSize
   const isLandscape = width > height
-  tr.withoutEnlargement().max().resize(
+  tr && tr.withoutEnlargement().max().resize(
     isLandscape ? width : undefined,
     isLandscape ? undefined : height
   )
@@ -244,7 +245,7 @@ function fitFocalCrop(tr, params, meta, opts) {
   const aspectWidth = clamp(width, params.minWidth, params.maxWidth)
   const aspectHeight = clamp(height, params.minHeight, params.maxHeight)
 
-  tr.resize(Math.round(aspectWidth), Math.round(aspectHeight))
+  tr && tr.resize(Math.round(aspectWidth), Math.round(aspectHeight))
 
   const targetWidth = params.width || aspectWidth
   const targetHeight = params.height || aspectHeight
@@ -283,7 +284,7 @@ function fitFocalCrop(tr, params, meta, opts) {
     params.overlays.push(crossHairs)
   }
 
-  tr.extract(crop)
+  tr && tr.extract(crop)
 
   const outputSize = opts.getOutputSize({sizeMode: 'crop'})
   const constrained = opts.constrain(outputSize)
@@ -298,7 +299,7 @@ function fitMin(tr, params, meta, opts) {
   params.outputSize = opts.constrain(opts.getOutputSize({sizeMode: 'simple'}))
 
   const {width, height} = params.outputSize
-  tr.withoutEnlargement().resize(width, height).crop()
+  tr && tr.withoutEnlargement().resize(width, height).crop()
 
   if (width < meta.width && height < meta.height) {
     return
@@ -319,7 +320,7 @@ function fitMin(tr, params, meta, opts) {
     height: newHeight
   })
 
-  tr.resize(newWidth, newHeight).crop()
+  tr && tr.resize(newWidth, newHeight).crop()
 }
 
 function fitGravityCrop(tr, params, meta, opts) {
@@ -331,7 +332,7 @@ function fitGravityCrop(tr, params, meta, opts) {
   const targetWidth = clamp(width, params.minWidth, Math.min(params.maxSize, params.maxWidth))
   const targetHeight = clamp(height, params.minHeight, Math.min(params.maxSize, params.maxHeight))
 
-  tr
+  tr && tr
     .resize(targetWidth, targetHeight)
     .crop(cropType || 'center')
 
@@ -366,21 +367,28 @@ function clamp(inp, min, max) {
 function orientation(tr, params) {
   // Auto-rotate by EXIF if no rotation is explicitly set
   if (isDefined(params.orientation)) {
-    tr.rotate(params.orientation)
+    tr && tr.rotate(params.orientation)
+    if (params.orientation % 180) {
+      params.outputSize = {
+        width: params.outputSize.height,
+        height: params.outputSize.width
+      }
+    }
   } else {
-    tr.rotate()
+    // @todo redefine output size
+    tr && tr.rotate()
   }
 }
 
 function background(tr, params, meta) {
   if (params.backgroundColor) {
-    tr.background(params.backgroundColor).flatten()
+    tr && tr.background(params.backgroundColor).flatten()
     return
   }
 
   const format = (params.output && params.output.format) || meta.format
   const hasAlpha = format !== 'jpeg'
-  tr.background(hasAlpha ? defaultBgColorAlpha : defaultBgColor)
+  tr && tr.background(hasAlpha ? defaultBgColorAlpha : defaultBgColor)
 }
 
 function flip(tr, params) {
@@ -389,11 +397,11 @@ function flip(tr, params) {
   }
 
   if (params.flip.includes('v')) {
-    tr.flip()
+    tr && tr.flip()
   }
 
   if (params.flip.includes('h')) {
-    tr.flop()
+    tr && tr.flop()
   }
 }
 
@@ -411,7 +419,7 @@ function output(tr, params, meta) {
   }
 
   if (out.format || params.quality) {
-    tr.toFormat(format, options)
+    tr && tr.toFormat(format, options)
   }
 }
 
@@ -439,7 +447,7 @@ function pad(tr, params, meta) {
     const size = params.pad * 2
     const width = params.width ? params.width - size : undefined
     const height = params.height ? params.height - size : undefined
-    tr.resize(width, height)
+    tr && tr.resize(width, height)
 
     const newSize = getNewSizeForAspectRatio({width, height}, meta)
     params.outputSize = {
@@ -448,7 +456,11 @@ function pad(tr, params, meta) {
     }
   }
 
-  tr.extend(params.pad)
+  tr && tr.extend(params.pad)
+  params.outputSize = {
+    width: params.outputSize.width + (params.pad * 2),
+    height: params.outputSize.height + (params.pad * 2)
+  }
 }
 
 function overlays(tr, params, meta) {
@@ -458,7 +470,7 @@ function overlays(tr, params, meta) {
   }
 
   const container = drawContainer(params.outputSize, content)
-  tr.overlayWith(Buffer.from(container, 'utf8'), {})
+  tr && tr.overlayWith(Buffer.from(container, 'utf8'), {})
 }
 
 function getNewSizeForAspectRatio(target, original) {
@@ -492,9 +504,9 @@ function constrainOriginal(tr, params, meta) {
   // Resize by aspect ratio
   const isLandscape = out.width > out.height
   if (isLandscape && out.width > max) {
-    tr.resize(max)
+    tr && tr.resize(max)
   } else if (out.height > max) {
-    tr.resize(undefined, max)
+    tr && tr.resize(undefined, max)
   }
 }
 
