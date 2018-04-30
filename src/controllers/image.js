@@ -138,10 +138,9 @@ function getHeaders(info, params, response) {
   headers['Content-Type'] = mimeType || 'application/octet-stream'
 
   // Cache settings
-  const cache = response.locals.source.cache || {}
-  if (cache.ttl) {
-    const ttl = cache.ttl | 0 // eslint-disable-line no-bitwise
-    headers['Cache-Control'] = `public, max-age=${ttl}`
+  const cacheControl = getCacheControlHeader(response)
+  if (cacheControl) {
+    headers['Cache-Control'] = cacheControl
   }
 
   // Download?
@@ -161,4 +160,22 @@ function getHeaders(info, params, response) {
   headers['X-Powered-By'] = 'mead.science'
 
   return headers
+}
+
+function getCacheControlHeader(response) {
+  const cache = response.locals.source.cache || {}
+  if (!(cache.ttl || cache.maxAge || cache.sharedMaxAge)) {
+    return false
+  }
+
+  const flags = ['public']
+  if (cache.maxAge || cache.ttl) {
+    flags.push(`max-age=${(cache.ttl || cache.maxAge) | 0}`) // eslint-disable-line no-bitwise
+  }
+
+  if (cache.sharedMaxAge) {
+    flags.push(`s-maxage=${cache.sharedMaxAge | 0}`) // eslint-disable-line no-bitwise
+  }
+
+  return flags.join(', ')
 }

@@ -20,7 +20,7 @@ module.exports = {
   ],
 
   cache: {
-    ttl: process.env.NODE_ENV === 'production' ? 86400 : 0,
+    maxAge: process.env.NODE_ENV === 'production' ? 86400 : 0,
   },
 
   vips: {

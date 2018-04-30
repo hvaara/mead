@@ -162,6 +162,27 @@ test('[image] sends correct cache-control when ttl is set on source', done => {
   })
 })
 
+test('[image] sends correct cache-control when max age and shared max age is set on source', done => {
+  const sources = [
+    {
+      name: 'foo',
+      cache: {maxAge: 3600, sharedMaxAge: 86400},
+      adapter: {
+        type: 'fs',
+        config: {basePath: path.join(__dirname, 'fixtures')}
+      }
+    }
+  ]
+
+  app({sources}, (err, mead) => {
+    expect(err).toBeFalsy()
+    request(mead)
+      .get('/foo/images/mead.png')
+      .expect('Cache-Control', /max-age=3600, s-maxage=86400/)
+      .expect(200, done)
+  })
+})
+
 test('[image] sends 415 on broken images', done => {
   app((err, mead) => {
     expect(err).toBeFalsy()
