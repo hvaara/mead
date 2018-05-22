@@ -12,11 +12,13 @@ const fromQueryString = require('./parameters/fromQueryString')
 const loadPlugins = require('./loadPlugins')
 const pkg = require('../package.json')
 
-module.exports = (config, callback) => {
+module.exports = (config, callback = null) => {
   const versionErr = assertNodeVersion()
-  if (versionErr) {
+  if (versionErr && callback) {
     callback(assertNodeVersion)
-    return
+    return null
+  } else if (versionErr) {
+    throw versionErr
   }
 
   const app = express()
@@ -26,13 +28,17 @@ module.exports = (config, callback) => {
 
   app.locals.knownQueryParams = fromQueryString.knowParameters
   app.locals.plugins = loadPlugins(app, err => {
-    if (err) {
+    if (err && callback) {
       callback(err)
       return
+    } else if (err) {
+      throw err
     }
 
     initApp(app, config, callback)
   })
+
+  return app
 }
 
 function initApp(app, config, callback) {
@@ -45,8 +51,12 @@ function initApp(app, config, callback) {
     app.use(sourceResolver(app))
     app.use(sourceAdapterLoader)
   } catch (err) {
-    callback(err)
-    return
+    if (callback) {
+      callback(err)
+      return
+    }
+
+    throw err
   }
 
   // Set options for sharp/vips
@@ -69,7 +79,9 @@ function initApp(app, config, callback) {
   // Error handler
   app.use(errorHandler)
 
-  setImmediate(callback, null, app)
+  if (callback) {
+    setImmediate(callback, null, app)
+  }
 }
 
 function assertNodeVersion() {
