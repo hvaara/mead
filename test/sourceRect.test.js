@@ -47,6 +47,19 @@ test('[sourceRect] pairs with resize', done => {
 test('[sourceRect] errors with 400 on bad extract area', done => {
   appify().then(server => new Promise((resolve, reject) => {
     request(server)
+      .get('/foo/images/320x180.png?rect=9,0,900,3000&w=30&h=30')
+      .expect(400, {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Source rectangle coordinates out of bounds'
+      })
+      .then(() => done())
+  }))
+})
+
+test('[sourceRect] errors with 400 on bad extract area', done => {
+  appify().then(server => new Promise((resolve, reject) => {
+    request(server)
       .get('/foo/images/320x180.png?rect=-15,0,90,300&w=30&h=30')
       .expect(400, {
         statusCode: 400,
