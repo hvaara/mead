@@ -8,7 +8,7 @@ const ValidationError = require('../errors/validationError')
 
 const queryMap = [
   // Input operations
-  ['rect', 'sourceRectangle', split, ints(4)],
+  ['rect', 'sourceRectangle', split, ints(4), positiveNumbers],
 
   // Important to know if we are dealing with transparency or not
   ['fm', 'output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
@@ -92,6 +92,16 @@ function mapQueryParameters(queryString, parameters = {}) {
     }, {}),
     cloneDeep(defaultParameters)
   )
+}
+
+function positiveNumbers(param, input) {
+  return input.map(number => {
+    if (number < 0) {
+      throw new ValidationError(`Parameter "${param}" requires only positive integers as argument`)
+    }
+
+    return number
+  })
 }
 
 function split(param, input) {

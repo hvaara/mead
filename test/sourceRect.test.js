@@ -1,4 +1,5 @@
-const {readImage} = require('./helpers')
+const request = require('supertest')
+const {appify, readImage} = require('./helpers')
 
 jest.setTimeout(15000)
 
@@ -41,4 +42,17 @@ test('[sourceRect] pairs with resize', done => {
     expect(img.height).toBe(100)
     done()
   })
+})
+
+test('[sourceRect] errors with 400 on bad extract area', done => {
+  appify().then(server => new Promise((resolve, reject) => {
+    request(server)
+      .get('/foo/images/320x180.png?rect=-15,0,90,300&w=30&h=30')
+      .expect(400, {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Parameter "rect" requires only positive integers as argument'
+      })
+      .then(() => done())
+  }))
 })
