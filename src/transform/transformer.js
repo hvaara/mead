@@ -415,6 +415,11 @@ function output(tr, params, meta) {
     options.quality = params.quality || defaultQuality
   }
 
+  if (!params.quality && format === 'webp') {
+    // WebP default quality is tuned too low for our liking
+    options.quality = 85
+  }
+
   if (out.progressive && format !== 'webp') {
     options.progressive = true
   }
