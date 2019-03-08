@@ -408,10 +408,11 @@ function flip(tr, params) {
 function output(tr, params, meta) {
   const out = params.output || {}
   const format = out.format || meta.format || 'jpeg'
+  const defaultQuality = format === 'webp' ? 85 : 75
   const options = {}
 
   if (params.quality && format !== 'png') {
-    options.quality = params.quality || 75
+    options.quality = params.quality || defaultQuality
   }
 
   if (out.progressive && format !== 'webp') {
