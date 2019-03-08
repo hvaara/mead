@@ -5,6 +5,7 @@ const availableHints = ['Save-Data', 'Viewport-Width', 'Width', 'DPR']
 const pipeline = [
   applyClientHints,
   applyMaxSize,
+  applyAuto,
   forceFormat,
 ]
 
@@ -36,6 +37,25 @@ function forceFormat(params, config, request) {
     mime: `image/${outputFormat}`,
     progressive: false
   }
+}
+
+function applyAuto(params, config, request) {
+  if (params.auto !== 'format') {
+    return
+  }
+
+  const accept = request.headers.accept || ''
+  if (!accept.includes('image/webp')) {
+    return
+  }
+
+  params.output = {
+    format: 'webp',
+    mime: 'image/webp',
+    progressive: false
+  }
+
+  params.responseHeaders.Vary = [].concat(params.responseHeaders.Vary || [], 'Accept')
 }
 
 function applyClientHints(params, config, request) {

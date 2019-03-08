@@ -110,3 +110,11 @@ test('[queryparams] throws if source rectangle does not have 4 integers', () => 
 test('[queryparams] throws if crop is not positional', () => {
   expect(() => fromQueryString({crop: 'foo'})).toThrowError(/one of/)
 })
+
+test('[queryparams] translates `auto` param into `auto` if accepted', () => {
+  expect(fromQueryString({auto: 'format'})).toMatchObject({auto: 'format'})
+})
+
+test('[queryparams] throws if `auto` param is not "format', () => {
+  expect(() => fromQueryString({auto: 'compress'})).toThrowError(/one of/)
+})

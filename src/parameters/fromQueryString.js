@@ -11,6 +11,7 @@ const queryMap = [
   ['rect', 'sourceRectangle', split, ints(4), positiveNumbers],
 
   // Important to know if we are dealing with transparency or not
+  ['auto', 'auto', enumz(['format'])],
   ['fm', 'output', mime(enumz(['jpg', 'pjpg', 'png', 'webp']))],
 
   // Affects sizes throughout
