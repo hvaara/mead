@@ -7,8 +7,10 @@ const drawContainer = require('../draw/drawContainer')
 const getOutputSize = require('./outputSize')
 const constrainSize = require('./constrainSize')
 
-const defaultBgColorAlpha = {r: 255, g: 255, b: 255, alpha: 0} // eslint-disable-line id-length
-const defaultBgColor = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
+const DEFAULT_WEBP_QUALITY = 87
+const DEFAULT_JPEG_QUALITY = 75
+const DEFAULT_BG_COLOR_ALPHA = {r: 255, g: 255, b: 255, alpha: 0} // eslint-disable-line id-length
+const DEFAULT_BG_COLOR = {r: 255, g: 255, b: 255} // eslint-disable-line id-length
 
 const pipeline = [
   sourceRect,
@@ -388,7 +390,7 @@ function background(tr, params, meta) {
 
   const format = (params.output && params.output.format) || meta.format
   const hasAlpha = format !== 'jpeg'
-  tr && tr.background(hasAlpha ? defaultBgColorAlpha : defaultBgColor)
+  tr && tr.background(hasAlpha ? DEFAULT_BG_COLOR_ALPHA : DEFAULT_BG_COLOR)
 }
 
 function flip(tr, params) {
@@ -408,7 +410,7 @@ function flip(tr, params) {
 function output(tr, params, meta) {
   const out = params.output || {}
   const format = out.format || meta.format || 'jpeg'
-  const defaultQuality = format === 'webp' ? 85 : 75
+  const defaultQuality = format === 'webp' ? DEFAULT_WEBP_QUALITY : DEFAULT_JPEG_QUALITY
   const options = {}
 
   if (params.quality && format !== 'png') {
@@ -417,7 +419,7 @@ function output(tr, params, meta) {
 
   if (!params.quality && format === 'webp') {
     // WebP default quality is tuned too low for our liking
-    options.quality = 85
+    options.quality = DEFAULT_WEBP_QUALITY
   }
 
   if (out.progressive && format !== 'webp') {
