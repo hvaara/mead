@@ -131,22 +131,22 @@ function getHeaders(info, params, response) {
   const headers = {}
 
   // Security
-  headers['X-Content-Type-Options'] = 'nosniff'
+  headers['x-content-type-options'] = 'nosniff'
 
   // Content type
   const mimeType = info.format && mimeTypes[info.format]
-  headers['Content-Type'] = mimeType || 'application/octet-stream'
+  headers['content-type'] = mimeType || 'application/octet-stream'
 
   // Cache settings
   const cacheControl = getCacheControlHeader(response)
   if (cacheControl) {
-    headers['Cache-Control'] = cacheControl
+    headers['cache-control'] = cacheControl
   }
 
   // Download?
   if (typeof params.download !== 'undefined') {
     const name = `"${encodeURIComponent(params.download || '')}"`
-    headers['Content-Disposition'] = `attachment;filename=${name}`
+    headers['content-disposition'] = `attachment;filename=${name}`
   }
 
   // Parameter-based headers
@@ -157,7 +157,7 @@ function getHeaders(info, params, response) {
   })
 
   // Shameless promotion
-  headers['X-Powered-By'] = 'mead.science'
+  headers['x-powered-by'] = 'mead.science'
 
   return headers
 }
