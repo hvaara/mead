@@ -11,7 +11,7 @@ test('[hints] save-data actually saves data', done => {
     request(server)
       .get('/foo/images/trim.jpg?ch=Save-Data,Width')
       .expect(200)
-      .expect('Vary', 'Save-Data,Width')
+      .expect('Vary', 'Save-Data, Width')
       .expect(res => Object.assign(sizes, {normal: res.body.length}))
       .end(whenDone)
 
@@ -19,7 +19,7 @@ test('[hints] save-data actually saves data', done => {
       .get('/foo/images/trim.jpg?ch=Save-Data,Width')
       .set('Save-Data', 'on')
       .expect(200)
-      .expect('Vary', 'Save-Data,Width')
+      .expect('Vary', 'Save-Data, Width')
       .expect(res => Object.assign(sizes, {saveData: res.body.length}))
       .end(whenDone)
   })
