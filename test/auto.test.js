@@ -9,6 +9,7 @@ test('[auto] does not change format if webp is unsupported', done => {
     request(mead)
       .get('/foo/images/320x180.png?auto=format')
       .expect(200)
+      .expect('Vary', 'Accept')
       .end((reqErr, res) => {
         expect(reqErr).toBeFalsy()
         assertImageMeta(res, {width: 320, height: 180, format: 'png'}, done)

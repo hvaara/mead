@@ -44,6 +44,8 @@ function applyAuto(params, config, request) {
     return
   }
 
+  params.responseHeaders.vary = [].concat(params.responseHeaders.vary || [], 'Accept')
+
   const accept = request.headers.accept || ''
   if (!accept.includes('image/webp')) {
     return
@@ -54,8 +56,6 @@ function applyAuto(params, config, request) {
     mime: 'image/webp',
     progressive: false
   }
-
-  params.responseHeaders.Vary = [].concat(params.responseHeaders.Vary || [], 'Accept')
 }
 
 function applyClientHints(params, config, request) {
@@ -73,7 +73,7 @@ function applyClientHints(params, config, request) {
   const useDpr = hints.dpr && params.dpr === 1
   if (useDpr) {
     params.dpr = hints.dpr
-    params.responseHeaders['Content-DPR'] = hints.dpr
+    params.responseHeaders['content-dpr'] = hints.dpr
   }
 
   applyWidthFromHints(params, hints, hintOptions, useDpr)
@@ -83,7 +83,7 @@ function getHintsFromRequest(params, request, options) {
   const headers = request.headers
   const enabled = (options.optIn ? params.clientHints : availableHints) || []
   if (enabled.length > 0) {
-    params.responseHeaders.Vary = [].concat(params.responseHeaders.Vary || [], enabled)
+    params.responseHeaders.vary = [].concat(params.responseHeaders.vary || [], enabled)
   }
 
   const hints = {}
