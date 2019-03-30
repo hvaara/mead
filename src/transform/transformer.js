@@ -453,8 +453,8 @@ function pad(tr, params, meta) {
 
   if (params.width || params.height) {
     const size = params.pad * 2
-    const width = params.width ? params.width - size : undefined
-    const height = params.height ? params.height - size : undefined
+    const width = params.width ? Math.max(1, params.width - size) : undefined
+    const height = params.height ? Math.max(1, params.height - size) : undefined
     tr && tr.resize(width, height)
 
     const newSize = getNewSizeForAspectRatio({width, height}, meta)
