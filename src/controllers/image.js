@@ -3,6 +3,7 @@ const pump = require('pump')
 const sharp = require('sharp')
 const values = require('lodash/values')
 const getStream = require('get-stream')
+const zlib = require('zlib')
 const parameters = require('../parameters')
 const transformer = require('../transform/transformer')
 const callMiddlewares = require('../callMiddlewares')
@@ -103,7 +104,14 @@ module.exports = (request, response, next) => {
 
   function passthrough(imageStream, headers) {
     response.set(headers)
-    pump(imageStream, response, handleError)
+    response.vary('accept-encoding')
+
+    if (headers['content-type'] === 'image/svg+xml' && (request.headers['accept-encoding'] || '').includes('gzip')) {
+      response.set('content-encoding', 'gzip')
+      pump(imageStream, zlib.createGzip(), response, handleError)
+    } else {
+      pump(imageStream, response, handleError)
+    }
   }
 
   function finalizeParams(meta) {
