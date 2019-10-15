@@ -8,7 +8,7 @@ const ValidationError = require('../errors/validationError')
 
 const queryMap = [
   // Input operations
-  ['rect', 'sourceRectangle', split, ints(4), positiveNumbers],
+  ['rect', 'sourceRectangle', split, ints(4), positiveNumbers, sourceRect],
 
   // Important to know if we are dealing with transparency or not
   ['auto', 'auto', enumz(['format'])],
@@ -107,6 +107,15 @@ function positiveNumbers(param, input) {
 
 function split(param, input) {
   return input.split(',')
+}
+
+function sourceRect(param, input) {
+  const [, , width, height] = input
+  if (width <= 0 || height <= 0) {
+    throw new ValidationError(`Parameter "${param}" requires a positive width and height`)
+  }
+
+  return input
 }
 
 function border(param, input) {

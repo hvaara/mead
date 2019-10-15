@@ -69,3 +69,16 @@ test('[sourceRect] errors with 400 on bad extract area', done => {
       .then(() => done())
   }))
 })
+
+test('[sourceRect] errors with 400 on bad extract area (width)', done => {
+  appify().then(server => new Promise((resolve, reject) => {
+    request(server)
+      .get('/foo/images/4032x3024.jpg?rect=1665,230,0,2109&w=400&h=1728495&fit=crop')
+      .expect(400, {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Parameter "rect" requires a positive width and height'
+      })
+      .then(() => done())
+  }))
+})
